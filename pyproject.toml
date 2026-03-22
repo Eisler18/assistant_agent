@@ -1,7 +1,7 @@
 [project]
 name = "assistant-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "Small project for master's degree thesis at Universidad Politecnica de Madrid"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = []
