@@ -83,8 +83,9 @@ class TestCompletedAtConsistency:
     assert task.completed_at is None
 
 # ------------------------------------------------------------------- #
-# Public Interface                                                   #
+# Public Interface                                                    #
 # ------------------------------------------------------------------- #
+# pylint: disable=too-few-public-methods
 class TestTaskCreate:
   def test_creates_task_with_given_fields(self):
     task = Task.create(
@@ -103,6 +104,7 @@ class TestTaskCreate:
     assert task.created_at is not None
     assert task.updated_at is not None
     assert task.id is not None
+# pylint: enable=too-few-public-methods
 
 class TestTaskUpdate:
   def test_updates_given_fields(self):
