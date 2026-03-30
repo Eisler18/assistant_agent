@@ -24,6 +24,37 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pylint>=4.0.5",
     "pytest>=9.0.2",
     "pytest-cov>=7.1.0",
+]
+
+[tool.pylint.messages_control]
+disable = [
+    "C0111",  # missing-docstring
+    "C0103",  # invalid-name
+    "R0903",  # too-few-public-methods
+]
+
+[tool.pylint.format]
+max-line-length = 100
+indent-string = "  "
+
+[tool.pylint.design]
+max-attributes = 10
+max-locals = 15
+
+[tool.pylint.basic]
+good-names = ["i", "j", "k", "ex", "Run", "_", "id", "x", "y", "z"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=src/assistant_agent --cov-report=xml --cov-report=html --cov-report=term-missing"
+markers = [
+    "unit: unit tests",
+    "integration: integration tests",
 ]
