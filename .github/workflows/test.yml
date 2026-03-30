@@ -29,11 +29,3 @@ jobs:
 
     - name: Run pytest
       run: uv run pytest
-
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v4
-      with:
-        files: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-      if: matrix.python-version == '3.12'
