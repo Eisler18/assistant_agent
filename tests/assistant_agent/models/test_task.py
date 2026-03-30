@@ -1,5 +1,5 @@
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from uuid import uuid4
 
 import pytest
@@ -130,3 +130,34 @@ class TestTaskUpdate:
     task = Task.create(title='Task')
     with pytest.raises(ValueError, match='Unknown fields: foo, bar'):
       task.update(foo=123, bar='abc')
+
+# ------------------------------------------------------------------- #
+# Serialization                                                       #
+# ------------------------------------------------------------------- #
+class TestTaskSerialization:
+  def test_serializes_to_dict(self):
+    task = Task.create(title='Task', description='Desc', estimated_minutes=20)
+    data = task.to_dict()
+    assert data['title'] == 'Task'
+    assert data['description'] == 'Desc'
+    assert data['estimated_minutes'] == 30
+    assert 'id' in data
+    assert 'created_at' in data
+    assert 'updated_at' in data
+
+  def test_serialized_dict_to_instance(self):
+    data = {
+      'id': str(uuid4()),
+      'title': 'Task',
+      'description': 'Desc',
+      'estimated_minutes': 30,
+      'created_at': datetime.now(UTC).isoformat(),
+      'updated_at': datetime.now(UTC).isoformat(),
+    }
+    task = Task.from_dict(data)
+    assert task.title == 'Task'
+    assert task.description == 'Desc'
+    assert task.estimated_minutes == 30
+    assert str(task.id) == data['id']
+    assert task.created_at.isoformat() == data['created_at']
+    assert task.updated_at.isoformat() == data['updated_at']

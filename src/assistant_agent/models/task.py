@@ -1,5 +1,6 @@
 
 import math
+from typing import Any
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.types import UUID4
 from uuid import uuid4
@@ -87,3 +88,11 @@ class Task(BaseModel):
   
   def delete(self) -> 'Task':
     return self.update(status=TaskStatus.DELETED)
+  
+  # Serialization
+  def to_dict(self) -> dict[str, Any]:
+    return self.model_dump(mode='json')
+
+  @classmethod
+  def from_dict(cls, data: dict[str, Any]) -> "Task":
+    return cls.model_validate(data)
