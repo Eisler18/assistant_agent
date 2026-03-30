@@ -41,4 +41,6 @@ uv sync
 
 ```bash
 uv run pytest
+uv run pylint tests/
+uv run pylint src/
 ```
