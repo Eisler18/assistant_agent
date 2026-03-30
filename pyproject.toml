@@ -58,3 +58,7 @@ markers = [
     "unit: unit tests",
     "integration: integration tests",
 ]
+
+[tool.coverage.run]
+omit = ["*/__init__.py"]
+
