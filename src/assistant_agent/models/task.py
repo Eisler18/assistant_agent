@@ -1,6 +1,6 @@
 
 import math
-from typing import Any
+from typing import Any, ClassVar, Optional
 from uuid import uuid4
 from datetime import date, datetime, UTC
 from enum import Enum
@@ -22,6 +22,8 @@ class Task(BaseModel):
   '''
   Task entity for the time management assistant
   '''
+
+  repository: ClassVar[Optional[Any]] = None
 
   id: UUID4 = Field(default_factory=uuid4, frozen=True)
   title: str
@@ -62,13 +64,21 @@ class Task(BaseModel):
     object.__setattr__(self, 'title', self.title.strip())
     return self
 
+  @classmethod
+  def set_repository(cls, repository: Any) -> None:
+    cls.repository = repository
+
   # Public Interface
   @classmethod
   def create(cls, **kwargs) -> 'Task':
     invalid_fields = kwargs.keys() & _SYSTEM_FIELDS
     if invalid_fields:
       raise ValueError(f"Cannot set system-managed fields: {', '.join(sorted(invalid_fields))}")
-    return cls(**kwargs)
+
+    task = cls(**kwargs)
+    if cls.repository is not None:
+      cls.repository.save(task.to_dict())
+    return task
 
   def update(self, **kwargs) -> 'Task':
     attributes = Task.model_fields.keys()
@@ -79,12 +89,29 @@ class Task(BaseModel):
         f"Unknown or non-updatable fields: {', '.join(sorted(unknown_or_immutable))}"
       )
 
-    return self.model_validate(
+    task =  self.model_validate(
       self.model_copy(update={ **kwargs, 'updated_at': datetime.now(UTC) })
     )
+    if self.__class__.repository is not None:
+      self.__class__.repository.save(task.to_dict())
+    return task
 
   def delete(self) -> 'Task':
     return self.update(status=TaskStatus.DELETED)
+
+  @classmethod
+  def find(cls, task_id: str) -> 'Task':
+    if cls.repository is None:
+      raise ValueError('No repository set for Task model')
+    data = cls.repository.get(task_id)
+    return cls.from_dict(data)
+
+  @classmethod
+  def search(cls, query: dict[str, Any] = None) -> list['Task']:
+    if cls.repository is None:
+      raise ValueError('No repository set for Task model')
+    results = cls.repository.list(query)
+    return [cls.from_dict(data) for data in results]
 
   # Serialization
   def to_dict(self) -> dict[str, Any]:
