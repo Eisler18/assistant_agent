@@ -51,16 +51,14 @@ classDiagram
         -updated_at: datetime
         -completed_at: datetime | None
         
+        +set_repository(repository) None
         +create(kwargs) Task
+        +find(task_id) Task
+        +search(query) list[Task]
         +update(kwargs) Task
         +delete() Task
         +to_dict() dict
         +from_dict(data) Task
-        -not_empty_title(v) str
-        -positive_integer(v) int
-        -_completed_at_consistency() Task
-        -_round_estimated_minutes() Task
-        -_strip_title() Task
     }
     
     Task "1" --> "1" TaskStatus : uses
@@ -143,9 +141,64 @@ task_dict = task.to_dict()
 task = Task.from_dict(task_dict)
 ```
 
+#### Repository-based Queries
+
+When a repository is set, you can query tasks directly from storage:
+
+```python
+# Find a single task by ID
+task = Task.find("123e4567-e89b-12d3-a456-426614174000")
+
+# Search all tasks
+all_tasks = Task.search()
+
+# Search with query filter (e.g., all pending tasks)
+pending_tasks = Task.search({"status": "pending"})
+
+# Multiple filter criteria
+completed_reports = Task.search({
+    "status": "completed",
+    "description": "report"
+})
+```
+
+Note: `find()` and `search()` require a repository to be set, otherwise they raise `ValueError`.
+
 ### Important Behaviors
 
 - **Auto-rounding**: Estimated minutes are rounded to 15-minute intervals for consistent scheduling.
 - **Immutable Fields**: `id` and `created_at` cannot be modified after creation.
 - **Auto-completion Tracking**: When a task is marked as completed, the completion timestamp is automatically recorded.
 - **Updated Tracking**: The `updated_at` field is automatically updated whenever the task is modified via the `update()` method.
+
+### Repository Integration
+
+The Task model is designed to work with repositories for data persistence. Key methods:
+
+- **`set_repository(repository)`**: Inject a repository instance (typically done at application startup)
+- **`find(task_id)`**: Retrieve a task by ID from the repository
+- **`search(query=None)`**: Query tasks with optional filtering
+
+Example initialization:
+
+```python
+from assistant_agent.models.task import Task
+from assistant_agent.repository import JsonRepository
+
+# At application startup
+repo = JsonRepository(file_name="tasks.json")
+Task.set_repository(repo)
+
+# Now all create/update/delete operations persist automatically
+task = Task.create(title="Task")  # Automatically saved
+updated = task.update(title="Updated")  # Changes saved
+deleted = task.delete()  # Deletion saved
+
+# And queries work
+task_from_storage = Task.find(task.id)
+all_tasks = Task.search()
+```
+
+**Automatic Persistence**: When a repository is set, `create()` and `update()` automatically persist changes to storage. If no repository is set, tasks work normally without persistence (no errors raised).
+
+For detailed information on repositories, see [Repository Pattern](Repository.md).
