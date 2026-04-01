@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
-from assistant_agent.models import Task
 
 class BaseRepository(ABC):
   @abstractmethod
@@ -8,13 +7,13 @@ class BaseRepository(ABC):
     pass
 
   @abstractmethod
-  def save(self, task: Task) -> None:
+  def save(self, task: Dict[str, Any]) -> None:
     pass
 
   @abstractmethod
-  def get(self, task_id: str) -> Task:
+  def get(self, task_id: str) -> Dict[str, Any]:
     pass
 
   @abstractmethod
-  def list(self, query: Dict[str, Any]) -> List[Task]:
+  def list(self, query: Dict[str, Any]) -> List[Dict[str, Any]]:
     pass

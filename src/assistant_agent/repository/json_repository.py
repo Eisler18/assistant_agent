@@ -2,7 +2,6 @@
 from typing import List, Dict, Any
 import json
 import os
-from assistant_agent.models import Task
 from .base import BaseRepository
 
 class JsonRepository(BaseRepository):
@@ -13,27 +12,27 @@ class JsonRepository(BaseRepository):
       with open(file_path, 'w', encoding=self.encoding) as f:
         json.dump({}, f)
 
-  def save(self, task: Task) -> None:
+  def save(self, task: Dict[str, Any]) -> None:
     data = self.__read_file()
-    data[str(task.id)] = task.to_dict()
+    data[task['id']] = task
     with open(self.file_path, 'w', encoding=self.encoding) as f:
       json.dump(data, f)
 
-  def get(self, task_id: str) -> Task:
+  def get(self, task_id: str) -> Dict[str, Any]:
     data = self.__read_file()
     if task_id not in data:
       raise KeyError(f'Task with id {task_id} not found')
-    return Task.from_dict(data[task_id])
+    return data[task_id]
 
-  def list(self, query: Dict[str, Any] = None) -> List[Task]:
+  def list(self, query: Dict[str, Any] = None) -> List[Dict[str, Any]]:
     data = self.__read_file()
-    tasks = [Task.from_dict(item) for item in data.values()]
+    tasks = list(data.values())
 
     if query is None:
       return tasks
 
     for key, value in query.items():
-      tasks = [t for t in tasks if getattr(t, key) == value]
+      tasks = [t for t in tasks if t.get(key, None) == value]
       if not tasks:
         break
     return tasks
