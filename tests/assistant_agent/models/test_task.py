@@ -20,7 +20,7 @@ class TestTaskStatus:
     assert isinstance(TaskStatus.PENDING, str)
 
 # ------------------------------------------------------------------ #
-# Task Validators                                                    #
+# Task Validators/Callbacks                                          #
 # ------------------------------------------------------------------ #
 class TestTitleValidator:
   def test_rejects_empty_string(self):
@@ -67,9 +67,6 @@ class TestEstimatedMinutesValidator:
     task = Task.create(title='Task')
     assert task.estimated_minutes is None
 
-# ------------------------------------------------------------------ #
-# Task Callbacks                                                     #
-# ------------------------------------------------------------------ #
 class TestCompletedAtConsistency:
   def test_auto_sets_completed_at_on_completed_status(self):
     task = Task.create(title='Task', status=TaskStatus.COMPLETED)
@@ -114,7 +111,7 @@ class TestTaskUpdate:
       estimated_minutes=20,
       updated_at=datetime(2024, 1, 1, tzinfo=timezone.utc)
     )
-    updated = task.update(title='New Task', estimated_minutes=35)
+    updated = task.update(title=' New Task', estimated_minutes=35)
 
     assert updated.title == 'New Task'
     assert updated.description == 'Desc'

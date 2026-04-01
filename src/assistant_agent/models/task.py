@@ -32,24 +32,7 @@ class Task(BaseModel):
   updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
   completed_at: datetime | None = None
 
-  # Validators
-  @field_validator('title')
-  @classmethod
-  def not_empty_title(cls, v):
-    if not v.strip():
-      raise ValueError('title must not be empty')
-    return v
-
-  @field_validator('estimated_minutes')
-  @classmethod
-  def positive_integer(cls, v):
-    if v is None:
-      return None
-    if v <= 0:
-      raise ValueError('estimated_minutes must be a positive integer')
-    return v
-
-  # Callbacks
+  # Validators/Callbacks
   @model_validator(mode='after')
   def _completed_at_consistency(self) -> 'Task':
     if self.status == TaskStatus.COMPLETED and self.completed_at is None:
@@ -60,13 +43,19 @@ class Task(BaseModel):
 
   @model_validator(mode='after')
   def _round_estimated_minutes(self) -> 'Task':
-    if self.estimated_minutes is not None:
+    if self.estimated_minutes is None:
+      return self
+    elif self.estimated_minutes <= 0:
+      raise ValueError('estimated_minutes must be a positive integer')
+    else:
       rounded = math.ceil(self.estimated_minutes / 15) * 15
       object.__setattr__(self, 'estimated_minutes', rounded)
     return self
 
   @model_validator(mode='after')
   def _strip_title(self) -> 'Task':
+    if not self.title.strip():
+      raise ValueError('title must not be empty')
     object.__setattr__(self, 'title', self.title.strip())
     return self
 
