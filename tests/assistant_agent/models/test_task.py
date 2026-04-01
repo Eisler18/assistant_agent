@@ -135,6 +135,15 @@ class TestTaskUpdate:
     with pytest.raises(ValueError, match='Unknown or non-updatable fields: bar, foo'):
       task.update(foo=123, bar='abc')
 
+# pylint: disable=too-few-public-methods
+class TestTaskDelete:
+  def test_delete_method(self):
+    task = Task.create(title='Task')
+    deleted = task.delete()
+    assert deleted.status == TaskStatus.DELETED
+    assert deleted is not task
+# pylint: enable=too-few-public-methods
+
 # ------------------------------------------------------------------- #
 # Serialization                                                       #
 # ------------------------------------------------------------------- #
