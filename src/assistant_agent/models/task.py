@@ -7,6 +7,8 @@ from enum import Enum
 from pydantic import BaseModel, Field, model_validator
 from pydantic.types import UUID4
 
+_SYSTEM_FIELDS = { 'id', 'created_at', 'updated_at', 'completed_at' }
+
 class TaskStatus(str, Enum):
   '''
   Task lifecycle states
@@ -31,8 +33,6 @@ class Task(BaseModel):
   created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), frozen=True)
   updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
   completed_at: datetime | None = None
-
-  _SYSTEM_FIELDS = { 'id', 'created_at', 'updated_at', 'completed_at' }
 
   # Validators/Callbacks
   @model_validator(mode='after')
@@ -65,15 +65,19 @@ class Task(BaseModel):
   # Public Interface
   @classmethod
   def create(cls, **kwargs) -> 'Task':
-
+    invalid_fields = kwargs.keys() & _SYSTEM_FIELDS
+    if invalid_fields:
+      raise ValueError(f"Cannot set system-managed fields: {', '.join(sorted(invalid_fields))}")
     return cls(**kwargs)
 
   def update(self, **kwargs) -> 'Task':
     attributes = Task.model_fields.keys()
 
-    unknown_or_immutable = [k for k in kwargs if k not in attributes or k in self._SYSTEM_FIELDS]
+    unknown_or_immutable = [k for k in kwargs if k not in attributes or k in _SYSTEM_FIELDS]
     if any(unknown_or_immutable):
-      raise ValueError(f"Unknown or non-updatable fields: {', '.join(unknown_or_immutable)}")
+      raise ValueError(
+        f"Unknown or non-updatable fields: {', '.join(sorted(unknown_or_immutable))}"
+      )
 
     return self.model_validate(
       self.model_copy(update={ **kwargs, 'updated_at': datetime.now(UTC) })

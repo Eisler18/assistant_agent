@@ -1,6 +1,7 @@
 
 from datetime import UTC, datetime, timezone
 from uuid import uuid4
+import time
 
 import pytest
 
@@ -82,7 +83,6 @@ class TestCompletedAtConsistency:
 # ------------------------------------------------------------------- #
 # Public Interface                                                    #
 # ------------------------------------------------------------------- #
-# pylint: disable=too-few-public-methods
 class TestTaskCreate:
   def test_creates_task_with_given_fields(self):
     task = Task.create(
@@ -101,16 +101,23 @@ class TestTaskCreate:
     assert task.created_at is not None
     assert task.updated_at is not None
     assert task.id is not None
-# pylint: enable=too-few-public-methods
+
+  def test_rejects_system_fields(self):
+    with pytest.raises(ValueError, match='Cannot set system-managed fields: created_at, id'):
+      Task.create(
+        title='Task',
+        id=uuid4(),
+        created_at=datetime(2000, 1, 1, tzinfo=timezone.utc)
+      )
 
 class TestTaskUpdate:
   def test_updates_given_fields(self):
     task = Task.create(
       title='Task',
       description='Desc',
-      estimated_minutes=20,
-      updated_at=datetime(2024, 1, 1, tzinfo=timezone.utc)
+      estimated_minutes=20
     )
+    time.sleep(0.01)
     updated = task.update(title=' New Task', estimated_minutes=35)
 
     assert updated.title == 'New Task'
@@ -120,12 +127,12 @@ class TestTaskUpdate:
 
   def test_ignores_immutable_fields(self):
     task = Task.create(title='Task')
-    with pytest.raises(ValueError, match='Unknown or non-updatable fields: id, created_at'):
+    with pytest.raises(ValueError, match='Unknown or non-updatable fields: created_at, id'):
       task.update(id=uuid4(), created_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
 
   def test_rejects_unknown_fields(self):
     task = Task.create(title='Task')
-    with pytest.raises(ValueError, match='Unknown or non-updatable fields: foo, bar'):
+    with pytest.raises(ValueError, match='Unknown or non-updatable fields: bar, foo'):
       task.update(foo=123, bar='abc')
 
 # ------------------------------------------------------------------- #
