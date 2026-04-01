@@ -193,6 +193,36 @@ class TestTaskFind:
     with pytest.raises(ValueError, match='No repository set for Task model'):
       Task.find('some-id')
 
+class TestTaskSearch:
+  def test_search_calls_repository_list(self, repository):
+    task1 = create_task(title='Task 1')
+    task2 = create_task(title='Task 2')
+    repository.list.return_value = [task1.to_dict(), task2.to_dict()]
+    results = Task.search()
+    repository.list.assert_called_once_with(None)
+    assert len(results) == 2
+    assert all(isinstance(t, Task) for t in results)
+    assert {t.id for t in results} == {task1.id, task2.id}
+
+  def test_search_with_query(self, repository):
+    create_task(title='Task 1', status='pending')
+    task2 = create_task(title='Task 2', status='completed')
+    repository.list.return_value = [task2.to_dict()]
+
+    results = Task.search(query={'status': 'completed'})
+    assert len(results) == 1
+    assert results[0].id == task2.id
+
+  def test_search_returns_empty_list_if_no_matches(self, repository):
+    repository.list.return_value = []
+    results = Task.search(query={'status': 'nonexistent'})
+    assert len(results) == 0
+
+  def test_search_raises_if_no_repository_set(self):
+    Task.set_repository(None)
+    with pytest.raises(ValueError, match='No repository set for Task model'):
+      Task.search()
+
 # ------------------------------------------------------------------- #
 # Serialization                                                       #
 # ------------------------------------------------------------------- #

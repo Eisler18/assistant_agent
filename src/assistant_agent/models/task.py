@@ -106,6 +106,13 @@ class Task(BaseModel):
     data = cls.repository.get(task_id)
     return cls.from_dict(data)
 
+  @classmethod
+  def search(cls, query: dict[str, Any] = None) -> list['Task']:
+    if cls.repository is None:
+      raise ValueError('No repository set for Task model')
+    results = cls.repository.list(query)
+    return [cls.from_dict(data) for data in results]
+
   # Serialization
   def to_dict(self) -> dict[str, Any]:
     return self.model_dump(mode='json')
