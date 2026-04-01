@@ -23,6 +23,7 @@ assistant_agent/
 ## Documentation
 
 - [Models](docs/models.md) - Core data models including Task entity and lifecycle management
+- [Repository](docs/repository.md) - Data persistence approach
 
 ## Getting Started
 
