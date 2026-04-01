@@ -1,6 +1,7 @@
 
 from datetime import UTC, datetime, timezone
 from uuid import uuid4
+import time
 
 import pytest
 
@@ -20,7 +21,7 @@ class TestTaskStatus:
     assert isinstance(TaskStatus.PENDING, str)
 
 # ------------------------------------------------------------------ #
-# Task Validators                                                    #
+# Task Validators/Callbacks                                          #
 # ------------------------------------------------------------------ #
 class TestTitleValidator:
   def test_rejects_empty_string(self):
@@ -67,9 +68,6 @@ class TestEstimatedMinutesValidator:
     task = Task.create(title='Task')
     assert task.estimated_minutes is None
 
-# ------------------------------------------------------------------ #
-# Task Callbacks                                                     #
-# ------------------------------------------------------------------ #
 class TestCompletedAtConsistency:
   def test_auto_sets_completed_at_on_completed_status(self):
     task = Task.create(title='Task', status=TaskStatus.COMPLETED)
@@ -85,7 +83,6 @@ class TestCompletedAtConsistency:
 # ------------------------------------------------------------------- #
 # Public Interface                                                    #
 # ------------------------------------------------------------------- #
-# pylint: disable=too-few-public-methods
 class TestTaskCreate:
   def test_creates_task_with_given_fields(self):
     task = Task.create(
@@ -104,17 +101,24 @@ class TestTaskCreate:
     assert task.created_at is not None
     assert task.updated_at is not None
     assert task.id is not None
-# pylint: enable=too-few-public-methods
+
+  def test_rejects_system_fields(self):
+    with pytest.raises(ValueError, match='Cannot set system-managed fields: created_at, id'):
+      Task.create(
+        title='Task',
+        id=uuid4(),
+        created_at=datetime(2000, 1, 1, tzinfo=timezone.utc)
+      )
 
 class TestTaskUpdate:
   def test_updates_given_fields(self):
     task = Task.create(
       title='Task',
       description='Desc',
-      estimated_minutes=20,
-      updated_at=datetime(2024, 1, 1, tzinfo=timezone.utc)
+      estimated_minutes=20
     )
-    updated = task.update(title='New Task', estimated_minutes=35)
+    time.sleep(0.01)
+    updated = task.update(title=' New Task', estimated_minutes=35)
 
     assert updated.title == 'New Task'
     assert updated.description == 'Desc'
@@ -123,15 +127,22 @@ class TestTaskUpdate:
 
   def test_ignores_immutable_fields(self):
     task = Task.create(title='Task')
-    updated = task.update(id=uuid4(), created_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
-
-    assert updated.id == task.id
-    assert updated.created_at == task.created_at
+    with pytest.raises(ValueError, match='Unknown or non-updatable fields: created_at, id'):
+      task.update(id=uuid4(), created_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
 
   def test_rejects_unknown_fields(self):
     task = Task.create(title='Task')
-    with pytest.raises(ValueError, match='Unknown fields: foo, bar'):
+    with pytest.raises(ValueError, match='Unknown or non-updatable fields: bar, foo'):
       task.update(foo=123, bar='abc')
+
+# pylint: disable=too-few-public-methods
+class TestTaskDelete:
+  def test_delete_method(self):
+    task = Task.create(title='Task')
+    deleted = task.delete()
+    assert deleted.status == TaskStatus.DELETED
+    assert deleted is not task
+# pylint: enable=too-few-public-methods
 
 # ------------------------------------------------------------------- #
 # Serialization                                                       #
