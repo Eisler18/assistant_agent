@@ -4,7 +4,7 @@ from typing import Any
 from uuid import uuid4
 from datetime import date, datetime, UTC
 from enum import Enum
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 from pydantic.types import UUID4
 
 class TaskStatus(str, Enum):
@@ -32,6 +32,8 @@ class Task(BaseModel):
   updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
   completed_at: datetime | None = None
 
+  _SYSTEM_FIELDS = { 'id', 'created_at', 'updated_at', 'completed_at' }
+
   # Validators/Callbacks
   @model_validator(mode='after')
   def _completed_at_consistency(self) -> 'Task':
@@ -45,11 +47,12 @@ class Task(BaseModel):
   def _round_estimated_minutes(self) -> 'Task':
     if self.estimated_minutes is None:
       return self
-    elif self.estimated_minutes <= 0:
+
+    if self.estimated_minutes <= 0:
       raise ValueError('estimated_minutes must be a positive integer')
-    else:
-      rounded = math.ceil(self.estimated_minutes / 15) * 15
-      object.__setattr__(self, 'estimated_minutes', rounded)
+
+    rounded = math.ceil(self.estimated_minutes / 15) * 15
+    object.__setattr__(self, 'estimated_minutes', rounded)
     return self
 
   @model_validator(mode='after')
@@ -62,16 +65,15 @@ class Task(BaseModel):
   # Public Interface
   @classmethod
   def create(cls, **kwargs) -> 'Task':
+
     return cls(**kwargs)
 
   def update(self, **kwargs) -> 'Task':
     attributes = Task.model_fields.keys()
 
-    if any(k not in attributes for k in kwargs):
-      raise ValueError(f"Unknown fields: {', '.join(k for k in kwargs if k not in attributes)}")
-
-    for k in ['id', 'created_at']:
-      kwargs.pop(k, None)
+    unknown_or_immutable = [k for k in kwargs if k not in attributes or k in self._SYSTEM_FIELDS]
+    if any(unknown_or_immutable):
+      raise ValueError(f"Unknown or non-updatable fields: {', '.join(unknown_or_immutable)}")
 
     return self.model_validate(
       self.model_copy(update={ **kwargs, 'updated_at': datetime.now(UTC) })

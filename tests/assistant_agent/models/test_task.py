@@ -120,14 +120,12 @@ class TestTaskUpdate:
 
   def test_ignores_immutable_fields(self):
     task = Task.create(title='Task')
-    updated = task.update(id=uuid4(), created_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
-
-    assert updated.id == task.id
-    assert updated.created_at == task.created_at
+    with pytest.raises(ValueError, match='Unknown or non-updatable fields: id, created_at'):
+      task.update(id=uuid4(), created_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
 
   def test_rejects_unknown_fields(self):
     task = Task.create(title='Task')
-    with pytest.raises(ValueError, match='Unknown fields: foo, bar'):
+    with pytest.raises(ValueError, match='Unknown or non-updatable fields: foo, bar'):
       task.update(foo=123, bar='abc')
 
 # ------------------------------------------------------------------- #
