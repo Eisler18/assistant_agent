@@ -20,7 +20,7 @@ def create_task(**kwargs) -> Task:
 # ------------------------------------------------------------------ #
 class TestJsonRepository:
   def test_save(self, tmp_path):
-    repo = JsonRepository(file_path=tmp_path / 'test.json')
+    repo = JsonRepository(root_path=tmp_path, file_name='test.json')
     task = create_task()
     task_dict = task.to_dict()
     repo.save(task_dict)
@@ -31,7 +31,7 @@ class TestJsonRepository:
     assert data[str(task.id)]['title'] == 'Test Task'
 
   def test_get(self, tmp_path):
-    repo = JsonRepository(file_path=tmp_path / 'test.json')
+    repo = JsonRepository(root_path=tmp_path, file_name='test.json')
     task = create_task()
     repo.save(task.to_dict())
 
@@ -43,7 +43,7 @@ class TestJsonRepository:
       repo.get('nonexistent-id')
 
   def test_list(self, tmp_path):
-    repo = JsonRepository(file_path=tmp_path / 'test.json')
+    repo = JsonRepository(root_path=tmp_path, file_name='test.json')
     task1 = create_task(title='Task 1', status='pending')
     task2 = create_task(title='Task 2', status='completed')
     repo.save(task1.to_dict())

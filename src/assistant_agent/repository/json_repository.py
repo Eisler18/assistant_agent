@@ -1,15 +1,22 @@
 
 from typing import List, Dict, Any
 import json
-import os
+from pathlib import Path
 from .base import BaseRepository
 
 class JsonRepository(BaseRepository):
-  def __init__(self, file_path: str = '../data/dump.json'):
-    self.file_path = file_path
+  def __init__(self, root_path: str | Path | None = None, file_name: str = 'dump.json'):
+    if root_path is None:
+      root_path = Path(__file__).resolve().parents[3] / 'data'
+
+    self.root_path = Path(root_path)
+    self.root_path.mkdir(parents=True, exist_ok=True)
+
+    self.file_path = self.root_path / file_name
     self.encoding = 'utf-8'
-    if not os.path.exists(file_path):
-      with open(file_path, 'w', encoding=self.encoding) as f:
+
+    if not self.file_path.exists():
+      with open(self.file_path, 'w', encoding=self.encoding) as f:
         json.dump({}, f)
 
   def save(self, task: Dict[str, Any]) -> None:
