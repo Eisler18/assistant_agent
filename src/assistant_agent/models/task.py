@@ -99,6 +99,13 @@ class Task(BaseModel):
   def delete(self) -> 'Task':
     return self.update(status=TaskStatus.DELETED)
 
+  @classmethod
+  def find(cls, task_id: str) -> 'Task':
+    if cls.repository is None:
+      raise ValueError('No repository set for Task model')
+    data = cls.repository.get(task_id)
+    return cls.from_dict(data)
+
   # Serialization
   def to_dict(self) -> dict[str, Any]:
     return self.model_dump(mode='json')

@@ -168,6 +168,31 @@ class TestTaskDelete:
     assert deleted is not task
 # pylint: enable=too-few-public-methods
 
+class TestTaskFind:
+  def test_find_calls_repository_get(self, repository):
+    task = create_task()
+    repository.get.return_value = task.to_dict()
+    Task.find(str(task.id))
+    repository.get.assert_called_once_with(str(task.id))
+
+  def test_find_returns_task_instance(self, repository):
+    task = create_task()
+    repository.get.return_value = task.to_dict()
+    found = Task.find(str(task.id))
+    assert isinstance(found, Task)
+    assert found.id == task.id
+    assert found.title == task.title
+
+  def test_find_raises_if_task_not_found(self, repository):
+    repository.get.side_effect = KeyError('not found')
+    with pytest.raises(KeyError, match='not found'):
+      Task.find('nonexistent-id')
+
+  def test_find_raises_if_no_repository_set(self):
+    Task.set_repository(None)
+    with pytest.raises(ValueError, match='No repository set for Task model'):
+      Task.find('some-id')
+
 # ------------------------------------------------------------------- #
 # Serialization                                                       #
 # ------------------------------------------------------------------- #
