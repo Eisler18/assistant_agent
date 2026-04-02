@@ -2,7 +2,7 @@
 import math
 from typing import Any, ClassVar, Optional
 from uuid import uuid4
-from datetime import date, datetime, UTC
+from datetime import datetime, UTC
 from enum import Enum
 from pydantic import BaseModel, Field, model_validator
 from pydantic.types import UUID4
@@ -28,8 +28,8 @@ class Task(BaseModel):
   id: UUID4 = Field(default_factory=uuid4, frozen=True)
   title: str
   description: str | None = None
-  deadline: date | None = None
-  planned_date: date | None = None
+  deadline: datetime | None = None
+  planned_at: datetime | None = None
   estimated_minutes: int | None = None
   status: TaskStatus = TaskStatus.PENDING
   created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), frozen=True)

@@ -17,8 +17,8 @@ The Task entity is the fundamental unit of work in the system. It manages task m
 | `id` | UUID4 | No | Unique identifier. Auto-generated on creation. Immutable. |
 | `title` | str | Yes | Task title. Must not be empty after stripping whitespace. |
 | `description` | str \| None | No | Optional detailed description of the task. |
-| `deadline` | date \| None | No | Optional deadline date for task completion. |
-| `planned_date` | date \| None | No | Optional planned date when the task will be worked on. |
+| `deadline` | datetime \| None | No | Optional deadline time for task completion. |
+| `planned_at` | datetime \| None | No | Optional planned time when the task will be worked on. |
 | `estimated_minutes` | int \| None | No | Estimated effort in minutes. Must be positive. Automatically rounded to nearest 15-minute increment. |
 | `status` | TaskStatus | No | Current lifecycle state. Defaults to `PENDING`. |
 | `created_at` | datetime | No | Timestamp when the task was created. Immutable. |
@@ -43,8 +43,8 @@ classDiagram
         -id: UUID4
         -title: str
         -description: str | None
-        -deadline: date | None
-        -planned_date: date | None
+        -deadline: datetime | None
+        -planned_at: datetime | None
         -estimated_minutes: int | None
         -status: TaskStatus
         -created_at: datetime
@@ -110,7 +110,7 @@ task = Task.create(title="Implement feature X")
 task = Task.create(
     title="Submit report",
     description="Submit quarterly report to management",
-    deadline=date(2026, 4, 15),
+    deadline=date(2026, 4, 15, tzinfo=UTC),
     estimated_minutes=120
 )
 ```
