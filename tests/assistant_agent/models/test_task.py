@@ -151,12 +151,14 @@ class TestTaskUpdate:
 
   def test_ignores_immutable_fields(self):
     task = create_task(title='Task')
-    with pytest.raises(ValueError, match='Unknown or non-updatable fields: created_at, id'):
-      task.update(id=uuid4(), created_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
+    updated = task.update(id=uuid4(), created_at=datetime(2000, 1, 1, tzinfo=timezone.utc))
+
+    assert updated.id == task.id
+    assert updated.created_at == task.created_at
 
   def test_rejects_unknown_fields(self):
     task = create_task(title='Task')
-    with pytest.raises(ValueError, match='Unknown or non-updatable fields: bar, foo'):
+    with pytest.raises(ValueError, match='Unknown fields: bar, foo'):
       task.update(foo=123, bar='abc')
 
 # pylint: disable=too-few-public-methods

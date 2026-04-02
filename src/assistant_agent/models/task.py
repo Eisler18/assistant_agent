@@ -83,14 +83,15 @@ class Task(BaseModel):
   def update(self, **kwargs) -> 'Task':
     attributes = Task.model_fields.keys()
 
-    unknown_or_immutable = [k for k in kwargs if k not in attributes or k in _SYSTEM_FIELDS]
-    if any(unknown_or_immutable):
+    unknown_fields = [k for k in kwargs if k not in attributes]
+    if unknown_fields:
       raise ValueError(
-        f"Unknown or non-updatable fields: {', '.join(sorted(unknown_or_immutable))}"
+        f"Unknown fields: {', '.join(sorted(unknown_fields))}"
       )
 
+    allowed_fields = { k: v for k, v in kwargs.items() if k not in _SYSTEM_FIELDS }
     task =  self.model_validate(
-      self.model_copy(update={ **kwargs, 'updated_at': datetime.now(UTC) })
+      self.model_copy(update={ **allowed_fields, 'updated_at': datetime.now(UTC) })
     )
     if self.__class__.repository is not None:
       self.__class__.repository.save(task.to_dict())
