@@ -1,4 +1,6 @@
 
+import os
+from pathlib import Path
 import json
 import pytest
 from assistant_agent.models import Task
@@ -58,3 +60,10 @@ class TestJsonRepository:
 
     empty_tasks = repo.list(query={'status': 'nonexistent'})
     assert len(empty_tasks) == 0
+
+  def test_file_creation(self):
+    JsonRepository(file_name='test.json')
+    file_path = Path.cwd() / 'data' / 'test.json'
+    assert file_path.exists()
+
+    os.remove(file_path)

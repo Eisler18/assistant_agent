@@ -7,7 +7,7 @@ from .base import BaseRepository
 class JsonRepository(BaseRepository):
   def __init__(self, root_path: str | Path | None = None, file_name: str = 'dump.json'):
     if root_path is None:
-      root_path = Path(__file__).resolve().parents[3] / 'data'
+      root_path = Path.cwd() / 'data'
 
     self.root_path = Path(root_path)
     self.root_path.mkdir(parents=True, exist_ok=True)
