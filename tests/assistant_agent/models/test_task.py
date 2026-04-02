@@ -112,14 +112,14 @@ class TestTaskCreate:
     task = create_task(
       title=' Write thesis',
       description='Finish writing the thesis by the end of the month.',
-      deadline=datetime(2024, 6, 30).date(),
-      planned_date=datetime(2024, 6, 29).date(),
+      deadline=datetime(2024, 6, 30, tzinfo=UTC),
+      planned_at=datetime(2024, 6, 29, tzinfo=UTC),
       estimated_minutes=115
     )
     assert task.title == 'Write thesis'
     assert task.description == 'Finish writing the thesis by the end of the month.'
-    assert task.deadline == datetime(2024, 6, 30).date()
-    assert task.planned_date == datetime(2024, 6, 29).date()
+    assert task.deadline == datetime(2024, 6, 30, tzinfo=UTC)
+    assert task.planned_at == datetime(2024, 6, 29, tzinfo=UTC)
     assert task.estimated_minutes == 120
     assert task.status == TaskStatus.PENDING
     assert task.created_at is not None
