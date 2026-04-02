@@ -103,7 +103,7 @@ class Task(BaseModel):
   def find(cls, task_id: str) -> 'Task':
     if cls.repository is None:
       raise ValueError('No repository set for Task model')
-    data = cls.repository.get(task_id)
+    data = cls.repository.get(str(task_id))
     return cls.from_dict(data)
 
   @classmethod
