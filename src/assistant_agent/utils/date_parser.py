@@ -1,5 +1,5 @@
 
-from datetime import datetime, UTC
+from datetime import datetime
 import os
 import dateparser
 from dotenv import load_dotenv
@@ -17,8 +17,4 @@ def parse_date(text: str) -> datetime | None:
   if not text or not text.strip():
     return None
 
-  dt = dateparser.parse(text, settings=_SETTINGS)
-  if dt is not None and dt.tzinfo is None:
-    dt = dt.replace(tzinfo=UTC)
-
-  return dt
+  return dateparser.parse(text, settings=_SETTINGS)

@@ -3,14 +3,14 @@ from datetime import datetime, UTC
 from zoneinfo import ZoneInfo
 from unittest.mock import patch
 import pytest
-from assistant_agent.utils import parse_date
+from assistant_agent.utils.date_parser import parse_date
 
 # ------------------------------------------------------------------ #
 # Helpers                                                            #
 # ------------------------------------------------------------------ #
 @pytest.fixture(autouse=True)
 def set_utc_timezone():
-  with patch('assistant_agent.utils.data_parser._SETTINGS', {
+  with patch('assistant_agent.utils.date_parser._SETTINGS', {
     'PREFER_DATES_FROM': 'future',
     'RETURN_AS_TIMEZONE_AWARE': True,
     'TO_TIMEZONE': 'UTC',
@@ -29,7 +29,7 @@ class TestTimezoneConfiguration:
 
   def test_custom_timezone_is_applied(self):
     timezone = 'Europe/Madrid'
-    with patch('assistant_agent.utils.data_parser._SETTINGS', {
+    with patch('assistant_agent.utils.date_parser._SETTINGS', {
       'PREFER_DATES_FROM': 'future',
       'RETURN_AS_TIMEZONE_AWARE': True,
       'TO_TIMEZONE': 'UTC',
