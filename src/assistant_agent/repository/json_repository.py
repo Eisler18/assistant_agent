@@ -1,4 +1,5 @@
 
+import os
 from typing import List, Dict, Any
 import json
 from pathlib import Path
@@ -22,8 +23,10 @@ class JsonRepository(BaseRepository):
   def save(self, task: Dict[str, Any]) -> None:
     data = self.__read_file()
     data[task['id']] = task
-    with open(self.file_path, 'w', encoding=self.encoding) as f:
-      json.dump(data, f)
+    tmp_path = self.file_path.with_suffix('.tmp')
+    with open(tmp_path, 'w', encoding=self.encoding) as f:
+      json.dump(data, f, indent=2)
+    os.replace(tmp_path, self.file_path)
 
   def get(self, task_id: str) -> Dict[str, Any]:
     data = self.__read_file()
