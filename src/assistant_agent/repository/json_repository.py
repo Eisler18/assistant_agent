@@ -5,6 +5,9 @@ import json
 from pathlib import Path
 from .base import BaseRepository
 
+class JsonRepositoryError(Exception):
+  pass
+
 class JsonRepository(BaseRepository):
   def __init__(self, root_path: str | Path | None = None, file_name: str = 'dump.json'):
     if root_path is None:
@@ -21,12 +24,15 @@ class JsonRepository(BaseRepository):
         json.dump({}, f)
 
   def save(self, task: Dict[str, Any]) -> None:
-    data = self.__read_file()
-    data[task['id']] = task
-    tmp_path = self.file_path.with_suffix('.tmp')
-    with open(tmp_path, 'w', encoding=self.encoding) as f:
-      json.dump(data, f, indent=2)
-    os.replace(tmp_path, self.file_path)
+    try:
+      data = self.__read_file()
+      data[task['id']] = task
+      tmp_path = self.file_path.with_suffix('.tmp')
+      with open(tmp_path, 'w', encoding=self.encoding) as f:
+        json.dump(data, f, indent=2)
+      os.replace(tmp_path, self.file_path)
+    except (TypeError, json.JSONDecodeError) as e:
+      raise JsonRepositoryError("Failed to save task") from e
 
   def get(self, task_id: str) -> Dict[str, Any]:
     data = self.__read_file()

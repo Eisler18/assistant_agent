@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 import pytest
 from assistant_agent.models import Task
-from assistant_agent.repository.json_repository import JsonRepository
+from assistant_agent.repository.json_repository import JsonRepository, JsonRepositoryError
 
 # ------------------------------------------------------------------ #
 # Helpers                                                            #
@@ -67,3 +67,41 @@ class TestJsonRepository:
     assert file_path.exists()
 
     os.remove(file_path)
+
+  def test_data_persistence(self, tmp_path):
+    repo1 = JsonRepository(root_path=tmp_path, file_name='test.json')
+    task = create_task(title='Task 1')
+    repo1.save(task.to_dict())
+
+    repo2 = JsonRepository(root_path=tmp_path, file_name='test.json')
+    retrieved = repo2.get(str(task.id))
+    assert retrieved['id'] == str(task.id)
+
+  def test_record_update(self, tmp_path):
+    repo = JsonRepository(root_path=tmp_path, file_name='test.json')
+    task = create_task(title='Original Title')
+    repo.save(task.to_dict())
+
+    task.title = 'Updated Title'
+    repo.save(task.to_dict())
+
+    retrieved = repo.get(str(task.id))
+    assert len(repo.list()) == 1
+    assert retrieved['id'] == str(task.id)
+    assert retrieved['title'] == 'Updated Title'
+
+  def test_file_integrity_on_save(self, tmp_path):
+    repo = JsonRepository(root_path=tmp_path, file_name='test.json')
+    task = create_task(title='Task 1')
+    repo.save(task.to_dict())
+
+    pytest.raises(JsonRepositoryError, lambda: repo.save('invalid data'))
+
+    task2 = create_task(title='Task 2')
+    repo.save(task2.to_dict())
+
+    with open(tmp_path / 'test.json', 'r', encoding='utf-8') as f:
+      data = json.load(f)
+    assert str(task.id) in data
+    assert str(task2.id) in data
+    assert len(data) == 2
