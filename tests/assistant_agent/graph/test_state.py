@@ -32,4 +32,4 @@ class TestAgentState:
   def test_intent_literals_match_routes(self):
     intents = set(get_args(IntentType))
 
-    assert intents == {'task_crud', 'briefing', 'unknown'}
+    assert intents == { 'task_crud', 'briefing', 'unknown' }

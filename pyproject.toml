@@ -55,6 +55,9 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "--cov=src/assistant_agent --cov-report=xml --cov-report=html --cov-report=term-missing"
+filterwarnings = [
+    "ignore:The default value of `allowed_objects` will change in a future version.*:langchain_core._api.deprecation.LangChainPendingDeprecationWarning",
+]
 markers = [
     "unit: unit tests",
     "integration: integration tests",
