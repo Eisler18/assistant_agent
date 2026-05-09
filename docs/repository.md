@@ -96,7 +96,7 @@ task_dict = {
   "updated_at": "2026-04-01T10:30:00+00:00",
   "completed_at": None,
   "deadline": None,
-  "planned_date": None
+  "planned_at": None
 }
 
 repo.save(task_dict)
@@ -178,7 +178,7 @@ Tasks are stored as a JSON object with task IDs as keys:
     "updated_at": "2026-04-01T10:30:00+00:00",
     "completed_at": null,
     "deadline": null,
-    "planned_date": null
+    "planned_at": null
   },
   "987f6543-a21c-45d6-e789-123456789abc": {
     "id": "987f6543-a21c-45d6-e789-123456789abc",
@@ -190,7 +190,7 @@ Tasks are stored as a JSON object with task IDs as keys:
     "updated_at": "2026-04-01T09:00:00+00:00",
     "completed_at": "2026-04-01T09:30:00+00:00",
     "deadline": null,
-    "planned_date": null
+    "planned_at": null
   }
 }
 ```
