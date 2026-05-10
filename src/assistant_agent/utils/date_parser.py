@@ -1,16 +1,13 @@
 
 from datetime import datetime
-import os
 import dateparser
-from dotenv import load_dotenv
-
-load_dotenv()
+from assistant_agent.config import Config
 
 _SETTINGS = {
   'PREFER_DATES_FROM': 'future',
   'RETURN_AS_TIMEZONE_AWARE': True,
   'TO_TIMEZONE': 'UTC',
-  'TIMEZONE': os.environ.get('AGENT_TIMEZONE', 'UTC')
+  'TIMEZONE': Config().timezone
 }
 
 def parse_date(text: str) -> datetime | None:
