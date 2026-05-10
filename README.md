@@ -24,6 +24,7 @@ assistant_agent/
 
 - [Models](docs/models.md) - Core data models including Task entity and lifecycle management
 - [Repository](docs/repository.md) - Data persistence approach
+- [LangSmith Tracing](docs/langsmith.md) - Trace setup and evidence for graph runs
 
 ## Getting Started
 
