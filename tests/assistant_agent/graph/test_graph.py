@@ -1,9 +1,11 @@
 
-from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.graph import END
 
 from assistant_agent.graph.graph import graph, route_by_intent, should_continue
 from assistant_agent.graph.state import AgentState
+from assistant_agent.config import Config
 
 # ------------------------------------------------------------------ #
 # Helper functions                                                   #
@@ -62,3 +64,30 @@ def test_should_continue():
 
   no_tool_state = sample_state(messages=[], intent='task_crud')
   assert should_continue(no_tool_state) == END
+
+
+# ------------------------------------------------------------------ #
+# Checkpointer tests                                                 #
+# ------------------------------------------------------------------ #
+def test_memory_saver_retains_messages(monkeypatch):
+  fake_llm = GenericFakeChatModel(
+    messages=iter([AIMessage(content='unknown'), AIMessage(content='unknown')])
+  )
+  monkeypatch.setattr(Config, 'llm', fake_llm)
+
+  thread_config = { 'configurable': { 'thread_id': 'test-thread' } }
+
+  first_state = {
+    'messages': [HumanMessage(content='Hello')],
+    'intent': 'unknown'
+  }
+  second_state = {
+    'messages': [HumanMessage(content='And tomorrow?')],
+    'intent': 'unknown'
+  }
+
+  graph.invoke(first_state, config=thread_config)
+  result = graph.invoke(second_state, config=thread_config)
+
+  message_text = [message.content for message in result['messages']]
+  assert message_text == ['Hello', 'And tomorrow?']

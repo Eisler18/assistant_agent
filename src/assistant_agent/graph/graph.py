@@ -1,6 +1,7 @@
 
 from langchain_core.messages import BaseMessage
 from langgraph.graph import END, START, StateGraph
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode
 from .nodes import briefing_node, intent_classifier_node, task_crud_node
 from .state import AgentState
@@ -104,4 +105,5 @@ _builder.add_conditional_edges(
 )
 _builder.add_edge('briefing_tools', 'briefing')
 
-graph = _builder.compile()
+_checkpointer = InMemorySaver()
+graph = _builder.compile(checkpointer=_checkpointer)
