@@ -148,6 +148,9 @@ def test_format_datetime():
   assert '2026-06-15 12:00' in formatted
   assert 'UTC' in formatted
 
+  formatted_none = format_datetime(None)
+  assert formatted_none == 'None'
+
 def test_get_day_bounds():
   day_start, day_end = get_day_bounds(datetime(2026, 6, 15, 12, 0, tzinfo=UTC))
   assert day_start.tzinfo == UTC
