@@ -3,7 +3,7 @@ from datetime import datetime, UTC
 from zoneinfo import ZoneInfo
 from unittest.mock import patch
 import pytest
-from assistant_agent.utils.date_parser import parse_date
+from assistant_agent.utils.date_parser import parse_date, str_to_datetime, ensure_utc
 
 # ------------------------------------------------------------------ #
 # Helpers                                                            #
@@ -85,7 +85,6 @@ class TestAbsoluteDates:
 # ------------------------------------------------------------------ #
 # Relative dates (frozen clock)                                       #
 # ------------------------------------------------------------------ #
-
 class TestRelativeDates:
   def test_in_n_days(self):
     result = parse_date('in 3 days')
@@ -104,3 +103,17 @@ class TestRelativeDates:
     result = parse_date('in 2 months at 3pm')
     assert round((result - datetime.now(UTC)).total_seconds() / (30 * 24 * 3600)) == 2
     assert result.hour == 15
+
+# ------------------------------------------------------------------ #
+# Task datetime parsing and UTC conversion utilities                 #
+# ------------------------------------------------------------------ #
+def test_str_to_datetime():
+  assert str_to_datetime('2026-06-15T12:00:00') == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
+  assert str_to_datetime('2026-06-15T12:00:00Z') == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
+  assert str_to_datetime('2026-06-15T14:00:00+02:00') == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
+  assert str_to_datetime(None) is None
+
+def test_ensure_utc():
+  assert ensure_utc(datetime(2026, 6, 15, 12, 0)) == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
+  assert ensure_utc(datetime(2026, 6, 15, 12, 0, tzinfo=UTC)) == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
+  assert ensure_utc(None) is None
