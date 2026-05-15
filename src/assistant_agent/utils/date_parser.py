@@ -17,12 +17,12 @@ def parse_date(text: str) -> datetime | None:
   return dateparser.parse(text, settings=_SETTINGS)
 
 def str_to_datetime(value: str | None) -> datetime | None:
-    if value is None:
-      return None
-    parsed = datetime.fromisoformat(value)
-    if parsed.tzinfo is None:
-      return parsed.replace(tzinfo=UTC)
-    return parsed.astimezone(UTC)
+  if value is None:
+    return None
+  parsed = datetime.fromisoformat(value)
+  if parsed.tzinfo is None:
+    return parsed.replace(tzinfo=UTC)
+  return parsed.astimezone(UTC)
 
 def ensure_utc(value: datetime | None) -> datetime | None:
   if value is None:

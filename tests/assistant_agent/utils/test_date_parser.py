@@ -108,12 +108,22 @@ class TestRelativeDates:
 # Task datetime parsing and UTC conversion utilities                 #
 # ------------------------------------------------------------------ #
 def test_str_to_datetime():
-  assert str_to_datetime('2026-06-15T12:00:00') == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
-  assert str_to_datetime('2026-06-15T12:00:00Z') == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
-  assert str_to_datetime('2026-06-15T14:00:00+02:00') == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
+  assert str_to_datetime('2026-06-15T12:00:00') == datetime(
+    2026, 6, 15, 12, 0, tzinfo=UTC
+  )
+  assert str_to_datetime('2026-06-15T12:00:00Z') == datetime(
+    2026, 6, 15, 12, 0, tzinfo=UTC
+  )
+  assert str_to_datetime('2026-06-15T14:00:00+02:00') == datetime(
+    2026, 6, 15, 12, 0, tzinfo=UTC
+  )
   assert str_to_datetime(None) is None
 
 def test_ensure_utc():
-  assert ensure_utc(datetime(2026, 6, 15, 12, 0)) == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
-  assert ensure_utc(datetime(2026, 6, 15, 12, 0, tzinfo=UTC)) == datetime(2026, 6, 15, 12, 0, tzinfo=UTC)
+  assert ensure_utc(datetime(2026, 6, 15, 12, 0)) == datetime(
+    2026, 6, 15, 12, 0, tzinfo=UTC
+  )
+  assert ensure_utc(datetime(2026, 6, 15, 12, 0, tzinfo=UTC)) == datetime(
+    2026, 6, 15, 12, 0, tzinfo=UTC
+  )
   assert ensure_utc(None) is None
