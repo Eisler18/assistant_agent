@@ -56,8 +56,12 @@ def coerce_datetime(value: datetime | str | None) -> datetime | None:
     return ensure_utc(value)
   return _parse_datetime_input(value)
 
-def format_datetime(value: str | None) -> str:
-  parsed = str_to_datetime(value)
+def format_datetime(value: str | datetime | None) -> str:
+  if isinstance(value, str):
+    parsed = str_to_datetime(value)
+  else:
+    parsed = value
+
   if parsed is None:
     return 'None'
 

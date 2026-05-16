@@ -16,7 +16,6 @@ def _has_tool_calls(message: BaseMessage | None) -> bool:
 
 def _build_query_tools() -> list:
   return [
-    tools.parse_date,
     tools.parse_date_range,
     tools.build_overdue_filter,
     tools.build_today_filter,
@@ -30,6 +29,7 @@ def _build_task_tools() -> list:
     tools.create_task,
     tools.update_task,
     tools.delete_task,
+    tools.format_task_preview,
     *_build_query_tools()
   ]
 
