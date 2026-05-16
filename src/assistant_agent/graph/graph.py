@@ -3,7 +3,13 @@ from langchain_core.messages import BaseMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode
-from .nodes import briefing_node, intent_classifier_node, task_crud_node
+from .nodes import (
+  intent_classifier_node,
+  task_create_node,
+  task_delete_node,
+  task_read_node,
+  task_update_node
+)
 from .state import AgentState
 from . import tools
 
@@ -14,35 +20,11 @@ def _has_tool_calls(message: BaseMessage | None) -> bool:
   tool_calls = getattr(message, 'tool_calls', None)
   return bool(tool_calls)
 
-def _build_query_tools() -> list:
-  return [
-    tools.parse_date_range,
-    tools.build_overdue_filter,
-    tools.build_today_filter,
-    tools.build_unscheduled_filter,
-    tools.get_task,
-    tools.list_tasks
-  ]
-
-def _build_task_tools() -> list:
-  return [
-    tools.create_task,
-    tools.update_task,
-    tools.delete_task,
-    tools.format_task_preview,
-    *_build_query_tools()
-  ]
-
-def _build_briefing_tools() -> list:
-  return [
-    tools.get_daily_briefing_data,
-    *_build_query_tools()
-  ]
 
 # --- Conditional routing functions --- #
 def route_by_intent(state: AgentState) -> str:
   intent = state.get('intent', 'unknown')
-  if intent in ('task_crud', 'briefing'):
+  if intent in ('task_create', 'task_read', 'task_update', 'task_delete'):
     return intent
   return END
 
@@ -54,56 +36,50 @@ def should_continue(state: AgentState) -> str:
     return END
 
   intent = state.get('intent', 'unknown')
-  if intent == 'task_crud':
-    return 'task_tools'
-  if intent == 'briefing':
-    return 'briefing_tools'
+  if intent == 'task_read':
+    return 'task_read_tools'
 
   return END
 
 
 # --- Tool nodes --- #
-_task_tools = ToolNode(_build_task_tools())
-_briefing_tools = ToolNode(_build_briefing_tools())
+_task_read_tools = ToolNode(tools.TASK_READ_TOOLS)
 
 # --- Graph construction --- #
 _builder = StateGraph(AgentState)
 _builder.add_node('intent_classifier', intent_classifier_node)
-_builder.add_node('task_crud', task_crud_node)
-_builder.add_node('briefing', briefing_node)
-_builder.add_node('task_tools', _task_tools)
-_builder.add_node('briefing_tools', _briefing_tools)
+_builder.add_node('task_read', task_read_node)
+_builder.add_node('task_read_tools', _task_read_tools)
+_builder.add_node('task_create', task_create_node)
+_builder.add_node('task_update', task_update_node)
+_builder.add_node('task_delete', task_delete_node)
 
 _builder.add_edge(START, 'intent_classifier')
 _builder.add_conditional_edges(
   'intent_classifier',
   route_by_intent,
   {
-    'task_crud': 'task_crud',
-    'briefing': 'briefing',
+    'task_create': 'task_create',
+    'task_read': 'task_read',
+    'task_update': 'task_update',
+    'task_delete': 'task_delete',
     END: END
   }
 )
 
 _builder.add_conditional_edges(
-  'task_crud',
+  'task_read',
   should_continue,
   {
-    'task_tools': 'task_tools',
+    'task_read_tools': 'task_read_tools',
     END: END
   }
 )
-_builder.add_edge('task_tools', 'task_crud')
+_builder.add_edge('task_read_tools', 'task_read')
 
-_builder.add_conditional_edges(
-  'briefing',
-  should_continue,
-  {
-    'briefing_tools': 'briefing_tools',
-    END: END
-  }
-)
-_builder.add_edge('briefing_tools', 'briefing')
+_builder.add_edge('task_create', END)
+_builder.add_edge('task_update', END)
+_builder.add_edge('task_delete', END)
 
 _checkpointer = InMemorySaver()
 graph = _builder.compile(checkpointer=_checkpointer)

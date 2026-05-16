@@ -263,3 +263,12 @@ def generate_calendar_link(
   '''
   _ = (title, start_time, duration_minutes, focus_time, task_id)
   return ''
+
+TASK_READ_TOOLS = [
+  list_tasks,
+  get_task,
+  parse_date_range,
+  build_overdue_filter,
+  build_today_filter,
+  build_unscheduled_filter
+]

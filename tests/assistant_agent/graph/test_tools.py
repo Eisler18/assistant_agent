@@ -94,7 +94,9 @@ def test_build_overdue_filter_tool():
   assert { 'deadline_lte', 'status' }.issubset(overdue.keys())
   assert isinstance(overdue['deadline_lte'], datetime)
   assert overdue['status'] == 'pending'
-  assert overdue['deadline_lte'] == pytest.approx(datetime.now(tools.UTC), abs=timedelta(seconds=5))
+  now = datetime.now(tools.UTC)
+  delta = abs((overdue['deadline_lte'] - now).total_seconds())
+  assert delta <= 5
 
 def test_build_today_filter_tool():
   today = tools.build_today_filter.invoke({})
