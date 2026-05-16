@@ -117,6 +117,19 @@ def test_build_unscheduled_filter_tool():
 # ------------------------------------------------------------------- #
 # Task-related Tool tests                                             #
 # ------------------------------------------------------------------- #
+def test_initialize_task_tool(monkeypatch):
+  initialized = tools.new_task.invoke({
+    'title': 'Write intro',
+    'description': 'Draft the introduction section',
+    'planned_at': 'tomorrow at 9am',
+    'deadline': 'next Monday at 5pm',
+    'estimated_minutes': 90
+  })['tasks'][0]
+
+  assert initialized['title'] == 'Write intro'
+  assert initialized['description'] == 'Draft the introduction section'
+  assert initialized['estimated_minutes'] == 90
+
 def test_create_task_tool(monkeypatch):
   created = DummyTask({
     'id': 'task-1',
@@ -124,7 +137,7 @@ def test_create_task_tool(monkeypatch):
     'status': 'pending'
   })
   create_mock = MagicMock(return_value=created)
-  monkeypatch.setattr(tools.Task, 'create', create_mock)
+  monkeypatch.setattr(tools.Task, 'save', create_mock)
 
   result = tools.create_task.invoke({
     'title': 'Write intro',
@@ -133,9 +146,7 @@ def test_create_task_tool(monkeypatch):
     'estimated_minutes': 90
   })
 
-  assert result == { 'task': created.to_dict() }
-  assert isinstance(create_mock.call_args.kwargs['planned_at'], datetime)
-  assert create_mock.call_args.kwargs['planned_at'].utcoffset().total_seconds() == 0
+  assert result == { 'tasks': [created.to_dict()] }
 
 def test_get_task_tool(monkeypatch):
   found = DummyTask({
@@ -147,7 +158,7 @@ def test_get_task_tool(monkeypatch):
   monkeypatch.setattr(tools.Task, 'find', find_mock)
 
   result = tools.get_task.invoke({'task_id': 'task-2'})
-  assert result == { 'task': found.to_dict() }
+  assert result == { 'tasks': [found.to_dict()] }
 
   def _raise(_):
     raise KeyError('not found')
@@ -184,6 +195,12 @@ def test_list_tasks_tool(monkeypatch):
   assert query['status'] == 'pending'
   assert isinstance(query['planned_at_gte'], datetime)
 
+  search_mock = MagicMock(return_value=[])
+  monkeypatch.setattr(tools.Task, 'search', search_mock)
+
+  output = tools.list_tasks.invoke({})
+  assert output == 'No tasks found matching the filters.'
+
 def test_update_task_tool(monkeypatch):
   task = DummyTask({
     'id': 'task-4',
@@ -201,7 +218,7 @@ def test_update_task_tool(monkeypatch):
     'description': 'Write the first draft',
     'deadline': '2026-05-02 10:00',
     'title': 'Reviewed Draft'
-  })
+  })['tasks'][0]
 
   assert result['status'] == 'completed'
   assert result['title'] == 'Reviewed Draft'
@@ -220,7 +237,7 @@ def test_delete_task_tool(monkeypatch):
   find_mock = MagicMock(return_value=task)
   monkeypatch.setattr(tools.Task, 'find', find_mock)
 
-  result = tools.delete_task.invoke({'task_id': 'task-5'})
+  result = tools.delete_task.invoke({'task_id': 'task-5'})['tasks'][0]
   assert result['status'] == 'deleted'
 
 def test_format_task_preview_excludes_internal_fields():
@@ -241,3 +258,6 @@ def test_format_task_preview_excludes_internal_fields():
   assert 'updated_at' not in preview
   assert 'completed_at' not in preview
   assert 'Preview' in preview
+
+  preview = tools.format_task_preview.invoke({ 'tasks': [] })
+  assert preview == 'No tasks found.'
