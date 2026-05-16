@@ -11,25 +11,30 @@ from ..utils.date_parser import (
 )
 
 @tool
-def format_task_preview(task_dict: dict) -> str:
+def format_task_preview(tasks: list[dict]) -> str:
   '''Format a user-facing task preview string from a task dict.
 
   Returns: string with title, planned_at, deadline, estimated_minutes, status.
   Example:
     Task preview:\n  Title: Write report\n  Planned: 2026-05-20 10:00 (UTC)
   '''
-  task = Task.from_dict(task_dict)
-  estimated_minutes = task.estimated_minutes
-  estimated_text = 'None' if estimated_minutes is None else f'{estimated_minutes} minutes'
+  if not tasks:
+    return 'No tasks found.'
 
-  return (
-    'Task preview:\n'
-    f"  Title: {task.title}\n"
-    f"  Planned: {format_datetime(task.planned_at)}\n"
-    f"  Deadline: {format_datetime(task.deadline)}\n"
-    f"  Estimated time: {estimated_text}\n"
-    f"  Status: {task.status}"
-  )
+  tasks = [Task.from_dict(task_dict) for task_dict in tasks]
+  previews = []
+  for task in tasks:
+    estimated_minutes = task.estimated_minutes
+    estimated_text = 'None' if estimated_minutes is None else f'{estimated_minutes} minutes'
+    previews.append(
+      f"  Title: {task.title}\n"
+      f"  Planned: {format_datetime(task.planned_at)}\n"
+      f"  Deadline: {format_datetime(task.deadline)}\n"
+      f"  Estimated time: {estimated_text}\n"
+      f"  Status: {task.status.capitalize()}"
+    )
+
+  return f"{'Tasks' if len(previews) > 1 else 'Task'}:\n" + '\n\n'.join(previews)
 
 # --- Task CRUD --- #
 @tool
@@ -58,7 +63,7 @@ def create_task(
     deadline=deadline_dt,
     estimated_minutes=estimated_minutes
   )
-  return task.to_dict()
+  return { 'task': task.to_dict() }
 
 @tool
 def get_task(task_id: str) -> dict:
@@ -72,7 +77,7 @@ def get_task(task_id: str) -> dict:
     task = Task.find(task_id)
   except KeyError as exc:
     raise ValueError(f'Task with id {task_id} not found') from exc
-  return task.to_dict()
+  return { 'task': task.to_dict() }
 
 @tool
 # pylint: disable=too-many-arguments
@@ -116,7 +121,9 @@ def list_tasks(
     query['has_planned_at'] = has_planned_at
 
   tasks = Task.search(query)
-  return [task.to_dict() for task in tasks]
+  if not tasks:
+    return 'No tasks found matching the filters.'
+  return { 'tasks': [task.to_dict() for task in tasks] }
 # pylint: enable=too-many-arguments
 
 # pylint: disable=too-many-arguments
@@ -195,7 +202,7 @@ def parse_date_range(expression: str, end_expression: str | None = None) -> dict
     else:
       start, end = get_day_bounds(start)
   else:
-    end = coerce_datetime(end_expression)
+    end = coerce_datetime(end_expression) + timedelta(days=1) - timedelta(microseconds=1)
 
   return {
     'start_time': start,
@@ -270,5 +277,6 @@ TASK_READ_TOOLS = [
   parse_date_range,
   build_overdue_filter,
   build_today_filter,
-  build_unscheduled_filter
+  build_unscheduled_filter,
+  format_task_preview
 ]

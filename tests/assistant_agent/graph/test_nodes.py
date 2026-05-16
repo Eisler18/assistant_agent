@@ -76,6 +76,22 @@ class TestTaskReadNode:
 
     assert should_continue(state) == 'task_read_tools'
 
+  def test_task_read_sanitizes_tool_call_names(self, fake_llm):
+    fake_llm.messages = iter([
+      AIMessage(
+        content='Example',
+        tool_calls=[{'name': 'list_tasks<|channel|>json', 'args': {}, 'id': '1'}]
+      )
+    ])
+    state = {
+      'messages': [HumanMessage(content='Show tasks')],
+      'intent': 'task_read'
+    }
+
+    result = task_read_node(state)
+
+    assert result['messages'][0].tool_calls[0]['name'] == 'list_tasks'
+
   def test_task_read_routes_to_end_without_tool_calls(self, fake_llm):
     fake_llm.messages = iter([AIMessage(content='Done')])
     state = {

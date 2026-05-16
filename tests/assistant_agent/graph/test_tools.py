@@ -133,7 +133,7 @@ def test_create_task_tool(monkeypatch):
     'estimated_minutes': 90
   })
 
-  assert result == created.to_dict()
+  assert result == { 'task': created.to_dict() }
   assert isinstance(create_mock.call_args.kwargs['planned_at'], datetime)
   assert create_mock.call_args.kwargs['planned_at'].utcoffset().total_seconds() == 0
 
@@ -147,7 +147,7 @@ def test_get_task_tool(monkeypatch):
   monkeypatch.setattr(tools.Task, 'find', find_mock)
 
   result = tools.get_task.invoke({'task_id': 'task-2'})
-  assert result == found.to_dict()
+  assert result == { 'task': found.to_dict() }
 
   def _raise(_):
     raise KeyError('not found')
@@ -179,7 +179,7 @@ def test_list_tasks_tool(monkeypatch):
     'has_planned_at': True
   })
 
-  assert output == [results[0].to_dict()]
+  assert output == { 'tasks': [results[0].to_dict()] }
   query = search_mock.call_args.args[0]
   assert query['status'] == 'pending'
   assert isinstance(query['planned_at_gte'], datetime)
@@ -224,7 +224,7 @@ def test_delete_task_tool(monkeypatch):
   assert result['status'] == 'deleted'
 
 def test_format_task_preview_excludes_internal_fields():
-  preview = tools.format_task_preview.invoke({ 'task_dict': {
+  preview = tools.format_task_preview.invoke({ 'tasks': [{
     'id': '1b206596-c446-4634-b567-f9383c6967ec',
     'title': 'Preview',
     'planned_at': '2026-05-10T10:00:00+00:00',
@@ -234,7 +234,7 @@ def test_format_task_preview_excludes_internal_fields():
     'created_at': '2026-05-01T10:00:00+00:00',
     'updated_at': '2026-05-02T10:00:00+00:00',
     'completed_at': None
-  } })
+  }] })
 
   assert 'internal-id' not in preview
   assert 'created_at' not in preview
