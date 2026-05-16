@@ -1,6 +1,7 @@
 
 from typing import get_args
-from langchain_core.messages import AIMessage, SystemMessage
+from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
+from langgraph.types import interrupt
 
 from ..config import Config
 from . import tools
@@ -72,8 +73,31 @@ def task_read_node(state: AgentState) -> dict:
   return { 'messages': [sanitized] }
 
 def task_create_node(state: AgentState) -> dict:
+  system_prompt = (
+    'You are a task creation assistant. Gather the required title and any optional fields. '
+    'Initialize the task, prepare a preview and ask for user confirmation before finalizing. '
+    'Use parse_date_range for any date expressions. '
+    'If confirmed, call create_task. '
+  )
+  messages = [SystemMessage(content=system_prompt), *state['messages']]
+  llm_with_tools = config.llm.bind_tools(tools.TASK_CREATE_TOOLS)
+  response = llm_with_tools.invoke(messages)
+  sanitized = _sanitize_tool_calls(response)
+  return { 'messages': [sanitized] }
+
+def task_interrupt_node(state: AgentState) -> dict:
   _ = state
-  return { 'messages': [AIMessage(content='[task_create stub]')] }
+  user_response = interrupt(
+    'Confirm task preview? Reply yes to confirm, add more details or no to cancel.'
+  )
+
+  confirmed = user_response.strip().lower() == 'yes'
+  cancelled = user_response.strip().lower() == 'no'
+
+  if not(confirmed or cancelled):
+    return { 'messages': [HumanMessage(content=user_response)] }
+
+  return { 'confirmation': confirmed, 'cancelled': cancelled }
 
 def task_update_node(state: AgentState) -> dict:
   _ = state

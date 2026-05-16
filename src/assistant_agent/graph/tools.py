@@ -65,7 +65,8 @@ def new_task(
   deadline: str | None = None,
   estimated_minutes: int | None = None,
 ) -> dict:
-  '''Initialize a task dict without saving to the repository. Useful for confirmation before creation.
+  '''Initialize a task dict without saving to the repository. 
+  Useful for confirmation before creation.
 
   Params: title (str), description (str|None), planned_at (str|None), deadline (str|None),
     estimated_minutes (int|None).
@@ -322,4 +323,11 @@ TASK_READ_TOOLS = [
   build_today_filter,
   build_unscheduled_filter,
   format_task_preview
+]
+
+TASK_CREATE_TOOLS = [
+  create_task,
+  new_task,
+  format_task_preview,
+  parse_date_range
 ]

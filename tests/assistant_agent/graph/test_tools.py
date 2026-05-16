@@ -117,7 +117,7 @@ def test_build_unscheduled_filter_tool():
 # ------------------------------------------------------------------- #
 # Task-related Tool tests                                             #
 # ------------------------------------------------------------------- #
-def test_initialize_task_tool(monkeypatch):
+def test_initialize_task_tool():
   initialized = tools.new_task.invoke({
     'title': 'Write intro',
     'description': 'Draft the introduction section',

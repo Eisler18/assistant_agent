@@ -19,3 +19,4 @@ class AgentState(TypedDict):
   tasks: list[Task] | None
   task_id: str | None
   confirmation: bool | None
+  cancelled: bool | None

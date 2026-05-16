@@ -1,19 +1,30 @@
 
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 from langchain_core.messages import AIMessage, HumanMessage
-from langgraph.graph import END
 import pytest
 
-from assistant_agent.graph.nodes import intent_classifier_node, task_read_node
-from assistant_agent.graph.graph import should_continue
+from assistant_agent.graph.nodes import (
+  intent_classifier_node,
+  task_interrupt_node,
+  task_create_node,
+  task_read_node
+)
 from assistant_agent.config import Config
 
 @pytest.fixture(name='fake_llm')
 def llm(monkeypatch):
   # pylint: disable=arguments-differ
   class FakeLLM(GenericFakeChatModel):
+    def __init__(self, messages):
+      super().__init__(messages=messages)
+      self._tools = []
+
     def bind_tools(self, tools):
+      self._tools = tools
       return self
+
+    def get_tools(self):
+      return self._tools
   # pylint: enable=arguments-differ
 
   fake_llm = FakeLLM(messages=iter([]))
@@ -50,6 +61,29 @@ class TestIntentClassifierNode:
 # Task read node tests                                               #
 # ------------------------------------------------------------------ #
 class TestTaskReadNode:
+  def test_task_read_has_read_tools(self, fake_llm):
+    fake_llm.messages = iter([AIMessage(content='task_read')])
+    state = {
+      'messages': [HumanMessage(content='What are my tasks for today?')],
+      'intent': 'task_read'
+    }
+
+    _ = task_read_node(state)
+
+    tools = fake_llm.get_tools()
+    tool_names = {tool.name for tool in tools}
+    expected_names = {
+      'list_tasks',
+      'format_task_preview',
+      'build_overdue_filter',
+      'parse_date_range',
+      'build_unscheduled_filter',
+      'get_task',
+      'build_today_filter'
+    }
+
+    assert expected_names == tool_names
+
   def test_task_read_node_returns_message(self, fake_llm):
     fake_llm.messages = iter([AIMessage(content='Here are your tasks')])
     state = {
@@ -58,23 +92,8 @@ class TestTaskReadNode:
     }
     result = task_read_node(state)
 
+    assert 'messages' in result
     assert result['messages'][0].content == 'Here are your tasks'
-
-  def test_task_read_routes_to_tools_when_tool_calls_present(self, fake_llm):
-    fake_llm.messages = iter([
-      AIMessage(content='Example', tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}])
-    ])
-    state = {
-      'messages': [
-        AIMessage(
-          content='Example',
-          tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}]
-        )
-      ],
-      'intent': 'task_read'
-    }
-
-    assert should_continue(state) == 'task_read_tools'
 
   def test_task_read_sanitizes_tool_call_names(self, fake_llm):
     fake_llm.messages = iter([
@@ -92,11 +111,82 @@ class TestTaskReadNode:
 
     assert result['messages'][0].tool_calls[0]['name'] == 'list_tasks'
 
-  def test_task_read_routes_to_end_without_tool_calls(self, fake_llm):
-    fake_llm.messages = iter([AIMessage(content='Done')])
+# ------------------------------------------------------------------ #
+# Task create node tests                                               #
+# ------------------------------------------------------------------ #
+class TestTaskCreateNode:
+  def test_task_create_returns_message(self, fake_llm):
+    fake_llm.messages = iter([
+      AIMessage(content='Example', tool_calls=[{ 'name': 'new_task', 'args': {}, 'id': '1' }])
+    ])
     state = {
-      'messages': [AIMessage(content='Done')],
-      'intent': 'task_read'
+      'messages': [HumanMessage(content='Create a task')],
+      'intent': 'task_create'
     }
 
-    assert should_continue(state) == END
+    result = task_create_node(state)
+
+    assert result['messages'][0].tool_calls[0]['name'] == 'new_task'
+    assert result['messages'][0].content == 'Example'
+
+  def test_task_create_has_create_tools(self, fake_llm):
+    fake_llm.messages = iter([AIMessage(content='Example')])
+    state = {
+      'messages': [HumanMessage(content='Create a task')],
+      'intent': 'task_create'
+    }
+
+    _ = task_create_node(state)
+
+    tools = fake_llm.get_tools()
+    tool_names = {tool.name for tool in tools}
+    expected_names = {
+      'create_task',
+      'new_task',
+      'format_task_preview',
+      'parse_date_range'
+    }
+    assert expected_names == tool_names
+
+# ------------------------------------------------------------------ #
+# Task interrupt node tests                                          #
+# ------------------------------------------------------------------ #
+class TestTaskInterruptNode:
+  def test_task_interrupt_returns_confirmation(self, fake_llm, monkeypatch):
+    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'yes')
+    fake_llm.messages = iter([AIMessage(content='yes')])
+    state = {
+      'messages': [HumanMessage(content='Create a task')],
+      'intent': 'task_create'
+    }
+
+    result = task_interrupt_node(state)
+
+    assert result['confirmation'] is True
+    assert result['cancelled'] is not True
+    assert 'messages' not in result
+
+  def test_task_interrupt_returns_cancellation(self, fake_llm, monkeypatch):
+    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'no')
+    fake_llm.messages = iter([AIMessage(content='no')])
+    state = {
+      'messages': [HumanMessage(content='Create a task')],
+      'intent': 'task_create'
+    }
+
+    result = task_interrupt_node(state)
+
+    assert result['cancelled'] is True
+    assert result['confirmation'] is not True
+
+  def test_task_interrupt_returns_details(self, monkeypatch):
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.interrupt',
+      lambda _: 'I want to change the date'
+    )
+
+    result = task_interrupt_node({})
+
+    assert 'confirmation' not in result
+    assert 'cancelled' not in result
+    assert result['messages'][0].content == 'I want to change the date'
