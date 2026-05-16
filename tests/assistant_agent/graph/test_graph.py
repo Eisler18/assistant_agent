@@ -24,37 +24,32 @@ def test_graph_nodes_present():
   node_names = set(graph_def.nodes.keys())
 
   assert 'intent_classifier' in node_names
-  assert 'task_crud' in node_names
-  assert 'briefing' in node_names
-  assert 'task_tools' in node_names
-  assert 'briefing_tools' in node_names
+  assert 'task_read' in node_names
+  assert 'task_read_tools' in node_names
+  assert 'task_create' in node_names
+  assert 'task_update' in node_names
+  assert 'task_delete' in node_names
 
 
 # ------------------------------------------------------------------ #
 # Routing tests                                                      #
 # ------------------------------------------------------------------ #
 def test_route_by_intent():
-  task_crud_state = sample_state(messages=[], intent='task_crud')
-  assert route_by_intent(task_crud_state) == 'task_crud'
+  task_read_state = sample_state(messages=[], intent='task_read')
+  assert route_by_intent(task_read_state) == 'task_read'
 
-  briefing_state = sample_state(messages=[], intent='briefing')
-  assert route_by_intent(briefing_state) == 'briefing'
+  task_create_state = sample_state(messages=[], intent='task_create')
+  assert route_by_intent(task_create_state) == 'task_create'
 
   unknown_state = sample_state(messages=[], intent=None)
   assert route_by_intent(unknown_state) == END
 
 def test_should_continue():
-  task_crud_state = sample_state(
+  task_read_state = sample_state(
     messages=[AIMessage(content='Example', tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}])],
-    intent='task_crud'
+    intent='task_read'
   )
-  assert should_continue(task_crud_state) == 'task_tools'
-
-  briefing_state = sample_state(
-    messages=[AIMessage(content='Example', tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}])],
-    intent='briefing'
-  )
-  assert should_continue(briefing_state) == 'briefing_tools'
+  assert should_continue(task_read_state) == 'task_read_tools'
 
   no_intent_state = sample_state(
     messages=[AIMessage(content='Example', tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}])],
@@ -62,7 +57,7 @@ def test_should_continue():
   )
   assert should_continue(no_intent_state) == END
 
-  no_tool_state = sample_state(messages=[], intent='task_crud')
+  no_tool_state = sample_state(messages=[], intent='task_read')
   assert should_continue(no_tool_state) == END
 
 

@@ -70,15 +70,24 @@ class Task(BaseModel):
 
   # Public Interface
   @classmethod
-  def create(cls, **kwargs) -> 'Task':
+  def new(cls, **kwargs) -> 'Task':
     invalid_fields = kwargs.keys() & _SYSTEM_FIELDS
     if invalid_fields:
       raise ValueError(f"Cannot set system-managed fields: {', '.join(sorted(invalid_fields))}")
+    return cls(**kwargs)
 
-    task = cls(**kwargs)
+  @classmethod
+  def create(cls, **kwargs) -> 'Task':
+    task = cls.new(**kwargs)
     if cls.repository is not None:
       cls.repository.save(task.to_dict())
     return task
+
+  def save(self) -> 'Task':
+    if self.__class__.repository is None:
+      raise ValueError('No repository set for Task model')
+    self.__class__.repository.save(self.to_dict())
+    return self
 
   def update(self, **kwargs) -> 'Task':
     attributes = Task.model_fields.keys()

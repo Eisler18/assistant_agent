@@ -134,6 +134,18 @@ class TestTaskCreate:
         created_at=datetime(2000, 1, 1, tzinfo=timezone.utc)
       )
 
+class TestTaskSave:
+  def test_save_calls_repository(self, repository):
+    task = Task.new(title='Test Task')
+    task.save()
+    repository.save.assert_called_with(task.to_dict())
+
+  def test_save_raises_if_no_repository_set(self):
+    Task.set_repository(None)
+    task = Task.new(title='Test Task')
+    with pytest.raises(ValueError, match='No repository set for Task model'):
+      task.save()
+
 class TestTaskUpdate:
   def test_updates_given_fields(self):
     task = create_task(
