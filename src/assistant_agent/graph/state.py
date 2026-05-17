@@ -16,7 +16,5 @@ IntentType = Literal[
 class AgentState(TypedDict):
   messages: Annotated[list, add_messages]
   intent: IntentType
-  tasks: list[Task] | None
-  task_id: str | None
   confirmation: bool | None
   cancelled: bool | None
