@@ -1,6 +1,6 @@
 
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 import pytest
 
 from assistant_agent.graph.nodes import (
@@ -143,8 +143,7 @@ class TestTaskCreateNode:
     expected_names = {
       'create_task',
       'new_task',
-      'format_task_preview',
-      'parse_date_range'
+      'format_task_preview'
     }
     assert expected_names == tool_names
 
@@ -152,40 +151,77 @@ class TestTaskCreateNode:
 # Task interrupt node tests                                          #
 # ------------------------------------------------------------------ #
 class TestTaskInterruptNode:
-  def test_task_interrupt_returns_confirmation(self, fake_llm, monkeypatch):
-    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'yes')
-    fake_llm.messages = iter([AIMessage(content='yes')])
+  def test_task_interrupt_has_no_tasks(self):
     state = {
       'messages': [HumanMessage(content='Create a task')],
+      'intent': 'task_create'
+    }
+
+    result = task_interrupt_node(state)
+
+    assert 'confirmation' not in result
+    assert 'cancelled' not in result
+    assert result['messages'][0].content == \
+      'No task details found. Please provide more information.'
+
+  def test_task_interrupt_returns_confirmation(self, monkeypatch):
+    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'yes')
+    state = {
+      'messages': [
+        HumanMessage(content='Create a task'),
+        ToolMessage(
+          name='new_task',
+          content='{"tasks": [{"title": "Test Task"}]}',
+          tool_call_id='1'
+        )
+      ],
       'intent': 'task_create'
     }
 
     result = task_interrupt_node(state)
 
     assert result['confirmation'] is True
-    assert result['cancelled'] is not True
+    assert 'cancelled' not in result
     assert 'messages' not in result
 
-  def test_task_interrupt_returns_cancellation(self, fake_llm, monkeypatch):
-    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'no')
-    fake_llm.messages = iter([AIMessage(content='no')])
+  def test_task_interrupt_returns_cancellation(self, monkeypatch):
+    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'No, I changed my mind.')
     state = {
-      'messages': [HumanMessage(content='Create a task')],
+      'messages': [
+        HumanMessage(content='Create a task'),
+        ToolMessage(
+          name='new_task',
+          content='{"tasks": [{"title": "Test Task"}]}',
+          tool_call_id='1'
+        )
+      ],
       'intent': 'task_create'
     }
 
     result = task_interrupt_node(state)
 
     assert result['cancelled'] is True
-    assert result['confirmation'] is not True
+    assert result['messages'][0].content == 'Task creation cancelled.'
+    assert 'confirmation' not in result
 
   def test_task_interrupt_returns_details(self, monkeypatch):
     monkeypatch.setattr(
       'assistant_agent.graph.nodes.interrupt',
       lambda _: 'I want to change the date'
     )
+    state = {
+      'messages': [
+        HumanMessage(content='Create a task'),
+        ToolMessage(
+          name='new_task',
+          content='{"tasks": [{"title": "Test Task"}]}',
+          tool_call_id='1'
+        )
+      ],
+      'intent': 'task_create'
+    }
 
-    result = task_interrupt_node({})
+    result = task_interrupt_node(state)
 
     assert 'confirmation' not in result
     assert 'cancelled' not in result

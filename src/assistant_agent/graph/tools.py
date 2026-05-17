@@ -328,6 +328,5 @@ TASK_READ_TOOLS = [
 TASK_CREATE_TOOLS = [
   create_task,
   new_task,
-  format_task_preview,
-  parse_date_range
+  format_task_preview
 ]
