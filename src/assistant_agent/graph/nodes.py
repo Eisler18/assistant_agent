@@ -1,6 +1,9 @@
 
 from typing import get_args
-from langchain_core.messages import AIMessage, SystemMessage
+import json
+
+from langchain_core.messages import AIMessage, SystemMessage, HumanMessage, ToolMessage
+from langgraph.types import interrupt
 
 from ..config import Config
 from . import tools
@@ -72,8 +75,42 @@ def task_read_node(state: AgentState) -> dict:
   return { 'messages': [sanitized] }
 
 def task_create_node(state: AgentState) -> dict:
-  _ = state
-  return { 'messages': [AIMessage(content='[task_create stub]')] }
+  system_prompt = (
+    'You are a task creation assistant. Gather the required title and any optional fields. '
+    'Initialize or modify the task first, then create it. '
+    'Use the user-facing format for any task details. '
+    'Do not parse dates yourself; always use the tools for that.'
+  )
+  messages = [SystemMessage(content=system_prompt), *state['messages']]
+  llm_with_tools = config.llm.bind_tools(tools.TASK_CREATE_TOOLS)
+  response = llm_with_tools.invoke(messages)
+  sanitized = _sanitize_tool_calls(response)
+  return { 'messages': [sanitized] }
+
+def task_interrupt_node(state: AgentState) -> dict:
+  new_task_message = [
+    msg for msg in state['messages'] if isinstance(msg, ToolMessage) and msg.name == 'new_task'
+  ]
+  if not new_task_message:
+    return {
+      'messages': [HumanMessage(content='No task details found. Please provide more information.')]
+    }
+
+  user_response = interrupt({
+    'question': 'Do you confirm the current task details? ' \
+       'Reply yes to confirm, add more details or no to cancel.',
+    'details': tools.format_task_preview.invoke(json.loads(new_task_message[-1].content))
+  })
+
+  confirmed = 'yes' in user_response.strip().lower()
+  cancelled = 'no' in user_response.strip().lower()
+
+  if not(confirmed or cancelled):
+    return { 'messages': [HumanMessage(content=user_response)] }
+  if cancelled:
+    return { 'messages': [AIMessage(content='Task creation cancelled.')], 'cancelled': True }
+
+  return { 'confirmation': confirmed }
 
 def task_update_node(state: AgentState) -> dict:
   _ = state

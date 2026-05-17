@@ -10,6 +10,25 @@ from ..utils.date_parser import (
   get_today_bounds
 )
 
+def _initialize_task(
+  title: str,
+  description: str | None = None,
+  planned_at: str | None = None,
+  deadline: str | None = None,
+  estimated_minutes: int | None = None,
+) -> Task:
+  planned_at_dt = coerce_datetime(planned_at)
+  deadline_dt = coerce_datetime(deadline)
+
+  task = Task.new(
+    title=title,
+    description=description,
+    planned_at=planned_at_dt,
+    deadline=deadline_dt,
+    estimated_minutes=estimated_minutes
+  )
+  return task
+
 @tool
 def format_task_preview(tasks: list[dict]) -> str:
   '''Format a user-facing task preview string from a task dict.
@@ -38,6 +57,32 @@ def format_task_preview(tasks: list[dict]) -> str:
 
 # --- Task CRUD --- #
 @tool
+def new_task(
+  title: str,
+  *,
+  description: str | None = None,
+  planned_at: str | None = None,
+  deadline: str | None = None,
+  estimated_minutes: int | None = None,
+) -> dict:
+  '''Initialize a task dict without saving to the repository. 
+  Useful for confirmation before creation.
+
+  Params: title (str), description (str|None), planned_at (str|None), deadline (str|None),
+    estimated_minutes (int|None).
+  Returns: dict of the initialized task.
+  Example: initialize_task({"title": "Write intro", "deadline": "next Friday"})
+  '''
+  task = _initialize_task(
+    title=title,
+    description=description,
+    planned_at=planned_at,
+    deadline=deadline,
+    estimated_minutes=estimated_minutes
+  )
+  return { 'tasks': [task.to_dict()] }
+
+@tool
 def create_task(
   title: str,
   *,
@@ -53,17 +98,16 @@ def create_task(
   Returns: dict of the created task.
   Example: create_task({"title": "Write intro", "deadline": "next Friday"})
   '''
-  planned_at_dt = coerce_datetime(planned_at)
-  deadline_dt = coerce_datetime(deadline)
-
-  task = Task.create(
+  task = _initialize_task(
     title=title,
     description=description,
-    planned_at=planned_at_dt,
-    deadline=deadline_dt,
+    planned_at=planned_at,
+    deadline=deadline,
     estimated_minutes=estimated_minutes
   )
-  return { 'task': task.to_dict() }
+  task = task.save()
+
+  return { 'tasks': [task.to_dict()] }
 
 @tool
 def get_task(task_id: str) -> dict:
@@ -77,7 +121,7 @@ def get_task(task_id: str) -> dict:
     task = Task.find(task_id)
   except KeyError as exc:
     raise ValueError(f'Task with id {task_id} not found') from exc
-  return { 'task': task.to_dict() }
+  return { 'tasks': [task.to_dict()] }
 
 @tool
 # pylint: disable=too-many-arguments
@@ -161,7 +205,7 @@ def update_task(
     fields['status'] = status
 
   updated = task.update(**fields)
-  return updated.to_dict()
+  return { 'tasks': [updated.to_dict()] }
 # pylint: enable=too-many-arguments
 
 @tool
@@ -174,7 +218,7 @@ def delete_task(task_id: str) -> dict:
   '''
   task = Task.find(task_id)
   deleted = task.delete()
-  return deleted.to_dict()
+  return { 'tasks': [deleted.to_dict()] }
 
 
 # --- Filter builders --- #
@@ -278,5 +322,11 @@ TASK_READ_TOOLS = [
   build_overdue_filter,
   build_today_filter,
   build_unscheduled_filter,
+  format_task_preview
+]
+
+TASK_CREATE_TOOLS = [
+  create_task,
+  new_task,
   format_task_preview
 ]
