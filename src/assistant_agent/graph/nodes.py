@@ -1,8 +1,7 @@
 
 from typing import get_args
-import json
 
-from langchain_core.messages import AIMessage, SystemMessage, HumanMessage, ToolMessage
+from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
 from langgraph.types import interrupt
 
 from ..config import Config
@@ -88,18 +87,23 @@ def task_create_node(state: AgentState) -> dict:
   return { 'messages': [sanitized] }
 
 def task_interrupt_node(state: AgentState) -> dict:
-  new_task_message = [
-    msg for msg in state['messages'] if isinstance(msg, ToolMessage) and msg.name == 'new_task'
+  create_task_messages = [
+    msg for msg in state['messages'] if
+      isinstance(msg, AIMessage) and
+      msg.tool_calls and
+      msg.tool_calls[0]['name'] == 'create_task'
   ]
-  if not new_task_message:
+  if not create_task_messages:
     return {
       'messages': [HumanMessage(content='No task details found. Please provide more information.')]
     }
 
+  new_task = tools.new_task.invoke(create_task_messages[-1].tool_calls[0]['args'])
+
   user_response = interrupt({
     'question': 'Do you confirm the current task details? ' \
        'Reply yes to confirm, add more details or no to cancel.',
-    'details': tools.format_task_preview.invoke(json.loads(new_task_message[-1].content))
+    'details': tools.format_task_preview.invoke(new_task)
   })
 
   confirmed = 'yes' in user_response.strip().lower()
