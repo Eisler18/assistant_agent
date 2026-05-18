@@ -24,6 +24,7 @@ def test_graph_nodes_present():
   assert 'task_interrupt' in node_names
   assert 'task_create_tools' in node_names
   assert 'task_update' in node_names
+  assert 'task_update_tools' in node_names
   assert 'task_delete' in node_names
 
 
@@ -54,6 +55,14 @@ def test_should_continue():
     intent='task_create'
   )
   assert should_continue(task_create_state) == 'task_interrupt'
+
+  task_update_state = AgentState(
+    messages=[
+      AIMessage(content='Example', tool_calls=[{'name': 'update_task', 'args': {}, 'id': '1'}])
+    ],
+    intent='task_update'
+  )
+  assert should_continue(task_update_state) == 'task_interrupt'
 
   task_create_state = AgentState(
     messages=[
@@ -92,6 +101,15 @@ def test_should_save_task():
   assert should_save_task(state) == END
 
   state = AgentState(messages=[], intent='task_read')
+  assert should_save_task(state) == END
+
+  state = AgentState(messages=[], intent='task_update', confirmation=True)
+  assert should_save_task(state) == 'task_update_tools'
+
+  state = AgentState(messages=[], intent='task_update', confirmation=False)
+  assert should_save_task(state) == 'task_update'
+
+  state = AgentState(messages=[], intent='task_update', cancelled=True)
   assert should_save_task(state) == END
 
 
