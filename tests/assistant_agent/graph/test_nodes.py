@@ -296,7 +296,8 @@ class TestTaskInterruptNode:
               'name': 'update_task',
               'args': {
                 'task_id': '123',
-                'title': 'Updated title'
+                'title': 'Updated title',
+                'planned_at': 'next Monday'
               },
               'id': '1'
             }

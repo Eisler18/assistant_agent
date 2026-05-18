@@ -56,14 +56,6 @@ def test_should_continue():
   )
   assert should_continue(task_create_state) == 'task_interrupt'
 
-  task_update_state = AgentState(
-    messages=[
-      AIMessage(content='Example', tool_calls=[{'name': 'update_task', 'args': {}, 'id': '1'}])
-    ],
-    intent='task_update'
-  )
-  assert should_continue(task_update_state) == 'task_interrupt'
-
   task_create_state = AgentState(
     messages=[
       AIMessage(content='Example', tool_calls=[{'name': 'create_task', 'args': {}, 'id': '1'}])
@@ -80,6 +72,22 @@ def test_should_continue():
     intent='task_create'
   )
   assert should_continue(task_create_state) == 'task_create_tools'
+
+  task_update_state = AgentState(
+    messages=[
+      AIMessage(content='Example', tool_calls=[{'name': 'update_task', 'args': {}, 'id': '1'}])
+    ],
+    intent='task_update'
+  )
+  assert should_continue(task_update_state) == 'task_interrupt'
+
+  task_update_state = AgentState(
+    messages=[
+      AIMessage(content='Example', tool_calls=[{'name': 'list_tasks', 'args': {}, 'id': '1'}])
+    ],
+    intent='task_update'
+  )
+  assert should_continue(task_update_state) == 'task_update_tools'
 
   no_intent_state = AgentState(
     messages=[AIMessage(content='Example', tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}])],
