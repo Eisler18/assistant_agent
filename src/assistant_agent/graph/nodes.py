@@ -2,9 +2,11 @@
 from typing import get_args
 
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
+from langchain_core.tools import ToolException
 from langgraph.types import interrupt
 
 from ..config import Config
+from ..utils.date_parser import coerce_datetime
 from . import tools
 from .state import AgentState, IntentType
 
@@ -77,33 +79,73 @@ def task_create_node(state: AgentState) -> dict:
   system_prompt = (
     'You are a task creation assistant. Gather the required title and any optional fields. '
     'Initialize or modify the task first, then create it. '
-    'Use the user-facing format for any task details. '
-    'Do not parse dates yourself; always use the tools for that.'
+    'Do not parse dates yourself; always use the tools for that. '
+    'Always use the user-facing format for any task details.'
   )
   messages = [SystemMessage(content=system_prompt), *state['messages']]
   llm_with_tools = config.llm.bind_tools(tools.TASK_CREATE_TOOLS)
   response = llm_with_tools.invoke(messages)
   sanitized = _sanitize_tool_calls(response)
-  return { 'messages': [sanitized] }
+  return {
+    'messages': [sanitized],
+    'confirmation': None,
+    'cancelled': None
+  }
+
+def task_update_node(state: AgentState) -> dict:
+  system_prompt = (
+    'You are a task update assistant. '
+    'Identify the target task first using get_task or list_tasks. '
+    'If multiple tasks match, ask the user to clarify which one. '
+    'Only use parse_date_range for filters, never for updating task fields. '
+    'When ready, call update_task with natural language values; '
+    'the graph will confirm before saving. '
+    'Do not parse dates yourself; always use the tools for that. '
+    'Always use the user-facing format for any task details.'
+  )
+  messages = [SystemMessage(content=system_prompt), *state['messages']]
+  llm_with_tools = config.llm.bind_tools(tools.TASK_UPDATE_TOOLS)
+  response = llm_with_tools.invoke(messages)
+  sanitized = _sanitize_tool_calls(response)
+  return {
+    'messages': [sanitized],
+    'confirmation': None,
+    'cancelled': None
+  }
 
 def task_interrupt_node(state: AgentState) -> dict:
-  create_task_messages = [
-    msg for msg in state['messages'] if
-      isinstance(msg, AIMessage) and
-      msg.tool_calls and
-      msg.tool_calls[0]['name'] == 'create_task'
+  tool_calls = [
+    msg.tool_calls[0] for msg in state['messages']
+    if isinstance(msg, AIMessage) and msg.tool_calls
   ]
-  if not create_task_messages:
-    return {
-      'messages': [HumanMessage(content='No task details found. Please provide more information.')]
-    }
+  target_call = next(
+    (call for call in reversed(tool_calls) if call['name'] in {'create_task', 'update_task'}),
+    None
+  )
 
-  new_task = tools.new_task.invoke(create_task_messages[-1].tool_calls[0]['args'])
+  if target_call['name'] == 'create_task':
+    preview_tasks = tools.new_task.run(target_call['args'])
+  else:
+    task_id = target_call['args'].get('task_id')
+    try:
+      current = tools.get_task.run({ 'task_id': task_id })
+    except Exception as e:
+      raise ToolException(f'Failed to retrieve current task details for task_id: {task_id}') from e
+    task_dict = current['tasks'][0]
+    updated_fields = {}
+    for key, value in target_call['args'].items():
+      if key != 'task_id' and value is not None:
+        if key in {'planned_at', 'deadline'}:
+          updated_fields[key] = coerce_datetime(value)
+        else:
+          updated_fields[key] = value
+    task_dict.update(updated_fields)
+    preview_tasks = { 'tasks': [task_dict] }
 
   user_response = interrupt({
     'question': 'Do you confirm the current task details? ' \
        'Reply yes to confirm, add more details or no to cancel.',
-    'details': tools.format_task_preview.invoke(new_task)
+    'details': tools.format_task_preview.run(preview_tasks)
   })
 
   confirmed = 'yes' in user_response.strip().lower()
@@ -115,10 +157,6 @@ def task_interrupt_node(state: AgentState) -> dict:
     return { 'messages': [AIMessage(content='Task creation cancelled.')], 'cancelled': True }
 
   return { 'confirmation': confirmed }
-
-def task_update_node(state: AgentState) -> dict:
-  _ = state
-  return { 'messages': [AIMessage(content='[task_update stub]')] }
 
 def task_delete_node(state: AgentState) -> dict:
   _ = state

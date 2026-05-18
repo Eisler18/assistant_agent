@@ -330,3 +330,11 @@ TASK_CREATE_TOOLS = [
   new_task,
   format_task_preview
 ]
+
+TASK_UPDATE_TOOLS = [
+  get_task,
+  list_tasks,
+  update_task,
+  parse_date_range,
+  format_task_preview
+]

@@ -1,13 +1,15 @@
 
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.tools import ToolException
 import pytest
 
 from assistant_agent.graph.nodes import (
   intent_classifier_node,
   task_interrupt_node,
   task_create_node,
-  task_read_node
+  task_read_node,
+  task_update_node
 )
 from assistant_agent.config import Config
 
@@ -148,22 +150,47 @@ class TestTaskCreateNode:
     assert expected_names == tool_names
 
 # ------------------------------------------------------------------ #
+# Task update node tests                                             #
+# ------------------------------------------------------------------ #
+class TestTaskUpdateNode:
+  def test_task_update_returns_message(self, fake_llm):
+    fake_llm.messages = iter([
+      AIMessage(content='Example', tool_calls=[{ 'name': 'update_task', 'args': {}, 'id': '1' }])
+    ])
+    state = {
+      'messages': [HumanMessage(content='Update a task')],
+      'intent': 'task_update'
+    }
+
+    result = task_update_node(state)
+
+    assert result['messages'][0].tool_calls[0]['name'] == 'update_task'
+    assert result['messages'][0].content == 'Example'
+
+  def test_task_update_has_update_tools(self, fake_llm):
+    fake_llm.messages = iter([AIMessage(content='Example')])
+    state = {
+      'messages': [HumanMessage(content='Update a task')],
+      'intent': 'task_update'
+    }
+
+    _ = task_update_node(state)
+
+    tools = fake_llm.get_tools()
+    tool_names = {tool.name for tool in tools}
+    expected_names = {
+      'get_task',
+      'list_tasks',
+      'update_task',
+      'parse_date_range',
+      'format_task_preview'
+    }
+    assert expected_names == tool_names
+
+# ------------------------------------------------------------------ #
 # Task interrupt node tests                                          #
 # ------------------------------------------------------------------ #
 class TestTaskInterruptNode:
-  def test_task_interrupt_has_no_tasks(self):
-    state = {
-      'messages': [HumanMessage(content='Create a task')],
-      'intent': 'task_create'
-    }
-
-    result = task_interrupt_node(state)
-
-    assert 'confirmation' not in result
-    assert 'cancelled' not in result
-    assert result['messages'][0].content == \
-      'No task details found. Please provide more information.'
-
   def test_task_interrupt_returns_confirmation(self, monkeypatch):
     monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'yes')
     state = {
@@ -247,3 +274,67 @@ class TestTaskInterruptNode:
     assert 'confirmation' not in result
     assert 'cancelled' not in result
     assert result['messages'][0].content == 'I want to change the date'
+
+  def test_task_interrupt_update_confirmation(self, monkeypatch):
+    class FakeTool():
+      def invoke(self, _query: str) -> dict:
+        return self.run(_query)
+
+      def run(self, _query: str) -> str:
+        return { 'tasks': [{ 'title': 'Test Task' }] }
+
+    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'yes')
+    monkeypatch.setattr('assistant_agent.graph.nodes.tools.get_task', FakeTool())
+
+    state = {
+      'messages': [
+        HumanMessage(content='Update a task'),
+        AIMessage(
+          content='',
+          tool_calls=[
+            {
+              'name': 'update_task',
+              'args': {
+                'task_id': '123',
+                'title': 'Updated title',
+                'planned_at': 'next Monday'
+              },
+              'id': '1'
+            }
+          ]
+        )
+      ],
+      'intent': 'task_update'
+    }
+
+    result = task_interrupt_node(state)
+
+    assert result['confirmation'] is True
+    assert 'cancelled' not in result
+    assert 'messages' not in result
+
+  def test_task_interrupt_update_missing_task_id(self):
+    state = {
+      'messages': [
+        HumanMessage(content='Update a task'),
+        AIMessage(
+          content='',
+          tool_calls=[
+            {
+              'name': 'update_task',
+              'args': {
+                'title': 'Updated title'
+              },
+              'id': '1'
+            }
+          ]
+        )
+      ],
+      'intent': 'task_update'
+    }
+
+    with pytest.raises(
+      ToolException,
+      match='Failed to retrieve current task details for task_id: None'
+    ):
+      task_interrupt_node(state)
