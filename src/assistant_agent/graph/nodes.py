@@ -94,11 +94,13 @@ def task_create_node(state: AgentState) -> dict:
 
 def task_update_node(state: AgentState) -> dict:
   system_prompt = (
-    'You are a task update assistant. Identify the target task first using get_task or list_tasks. '
-    'Only use parse_date_range for filters, never for updating task fields. '
-    'Update task will parse the dates correctly as long as you provide them in natural language. '
-    'Do not parse dates yourself; always use the tools for that. '
+    'You are a task update assistant. '
+    'Identify the target task first using get_task or list_tasks. '
     'If multiple tasks match, ask the user to clarify which one. '
+    'Only use parse_date_range for filters, never for updating task fields. '
+    'When ready, call update_task with natural language values; '
+    'the graph will confirm before saving. '
+    'Do not parse dates yourself; always use the tools for that. '
     'Always use the user-facing format for any task details.'
   )
   messages = [SystemMessage(content=system_prompt), *state['messages']]
