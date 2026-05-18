@@ -1,6 +1,6 @@
 
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
-from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage
 import pytest
 
 from assistant_agent.graph.nodes import (
@@ -169,10 +169,17 @@ class TestTaskInterruptNode:
     state = {
       'messages': [
         HumanMessage(content='Create a task'),
-        ToolMessage(
-          name='new_task',
-          content='{"tasks": [{"title": "Test Task"}]}',
-          tool_call_id='1'
+        AIMessage(
+          content='',
+          tool_calls=[
+            {
+              'name': 'create_task',
+              'args': {
+                'title': 'Test Task'
+              },
+              'id': '1'
+            }
+          ]
         )
       ],
       'intent': 'task_create'
@@ -189,10 +196,17 @@ class TestTaskInterruptNode:
     state = {
       'messages': [
         HumanMessage(content='Create a task'),
-        ToolMessage(
-          name='new_task',
-          content='{"tasks": [{"title": "Test Task"}]}',
-          tool_call_id='1'
+        AIMessage(
+          content='',
+          tool_calls=[
+            {
+              'name': 'create_task',
+              'args': {
+                'title': 'Test Task'
+              },
+              'id': '1'
+            }
+          ]
         )
       ],
       'intent': 'task_create'
@@ -212,10 +226,17 @@ class TestTaskInterruptNode:
     state = {
       'messages': [
         HumanMessage(content='Create a task'),
-        ToolMessage(
-          name='new_task',
-          content='{"tasks": [{"title": "Test Task"}]}',
-          tool_call_id='1'
+        AIMessage(
+          content='',
+          tool_calls=[
+            {
+              'name': 'create_task',
+              'args': {
+                'title': 'Test Task'
+              },
+              'id': '1'
+            }
+          ]
         )
       ],
       'intent': 'task_create'

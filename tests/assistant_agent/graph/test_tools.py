@@ -56,8 +56,8 @@ def test_tools_have_descriptions():
 # ------------------------------------------------------------------ #
 def test_parse_date_range_tool():
   parsed_range = tools.parse_date_range.invoke({
-    'expression': 'this Monday',
-    'end_expression': 'this Friday'
+    'expression': 'next Monday',
+    'end_expression': 'next Month'
   })
   assert isinstance(parsed_range, dict)
   assert { 'start_time', 'end_time' }.issubset(parsed_range.keys())
