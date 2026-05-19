@@ -7,7 +7,6 @@ from .nodes import (
   intent_classifier_node,
   task_create_node,
   task_interrupt_node,
-  task_delete_node,
   task_read_node,
   task_update_node
 )
@@ -25,7 +24,7 @@ def _has_tool_calls(message: BaseMessage | None) -> bool:
 # --- Conditional routing functions --- #
 def route_by_intent(state: AgentState) -> str:
   intent = state.get('intent', 'unknown')
-  if intent in ('task_create', 'task_read', 'task_update', 'task_delete'):
+  if intent in ('task_create', 'task_read', 'task_update'):
     return intent
   return END
 
@@ -45,7 +44,10 @@ def should_continue(state: AgentState) -> str:
       else:
         result = 'task_create_tools'
     elif intent == 'task_update':
-      if 'update_task' in tool_name and state.get('confirmation') is not True:
+      if (
+        tool_name in {'update_task', 'delete_task'}
+        and state.get('confirmation') is not True
+      ):
         result = 'task_interrupt'
       else:
         result = 'task_update_tools'
@@ -90,7 +92,6 @@ _builder.add_node('task_interrupt', task_interrupt_node)
 _builder.add_node('task_create_tools', _task_create_tools)
 _builder.add_node('task_update', task_update_node)
 _builder.add_node('task_update_tools', _task_update_tools)
-_builder.add_node('task_delete', task_delete_node)
 
 _builder.add_edge(START, 'intent_classifier')
 _builder.add_conditional_edges(
@@ -100,7 +101,6 @@ _builder.add_conditional_edges(
     'task_create': 'task_create',
     'task_read': 'task_read',
     'task_update': 'task_update',
-    'task_delete': 'task_delete',
     END: END
   }
 )
@@ -147,8 +147,6 @@ _builder.add_conditional_edges(
 _builder.add_edge('task_create_tools', 'task_create')
 _builder.add_edge('task_update_tools', 'task_update')
 _builder.add_edge('task_interrupt', END)
-
-_builder.add_edge('task_delete', END)
 
 _checkpointer = InMemorySaver()
 graph = _builder.compile(checkpointer=_checkpointer)
