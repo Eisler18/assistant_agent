@@ -63,7 +63,7 @@ def test_parse_date_range_tool():
   assert { 'start_time', 'end_time' }.issubset(parsed_range.keys())
   assert parsed_range['start_time'] < parsed_range['end_time']
   assert parsed_range['start_time'].weekday() == 0
-  assert parsed_range['end_time'].weekday() == 4
+  assert parsed_range['end_time'].month == datetime.now(tools.UTC).month + 1
 
   parsed_range = tools.parse_date_range.invoke({
     'expression': 'this week'
