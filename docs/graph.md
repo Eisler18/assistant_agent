@@ -10,27 +10,36 @@ managed through `ToolNode`.
 
 ```mermaid
 flowchart TD
-  START([START]) --> intent_classifier[intent_classifier]
-  intent_classifier -->|task_read| task_read[task_read]
-  intent_classifier -->|task_create| task_create[task_create]
-  intent_classifier -->|task_update| task_update[task_update]
-  intent_classifier -->|unknown| END([END])
+  START([START]) --> intent_classifier
+  intent_classifier --Create --> task_create
+  intent_classifier --Update --> task_update
+  intent_classifier --Read --> task_read
+  intent_classifier --Unknown --> END
 
-  task_read -->|tool_calls| task_read_tools[task_read_tools]
-  task_read_tools --> task_read
-  task_read -->|no tool_calls| END
+  task_read --> END
+  task_create --> END
+  task_update --> END
+  task_interrupt --> END
 
-  task_create -->|write tool| task_interrupt[task_interrupt]
-  task_create -->|other tool| task_create_tools[task_create_tools]
-  task_create_tools --> task_create
+  task_read --Tools--> task_read_tools --> task_read
+  task_create --Other tools --> task_create_tools --> task_create
+  task_update --Other tools --> task_update_tools --> task_update
 
   task_update -->|write tool| task_interrupt
-  task_update -->|other tool| task_update_tools[task_update_tools]
-  task_update_tools --> task_update
-
+  task_create -->|write tool| task_interrupt
   task_interrupt -->|confirm| task_create_tools
   task_interrupt -->|confirm| task_update_tools
   task_interrupt -->|cancel| END
+
+  intent_classifier[intent_classifier]
+  task_read[task_read]
+  task_create[task_create]
+  task_update[task_update]
+  task_read_tools[task_read_tools]
+  task_create_tools[task_create_tools]
+  task_update_tools[task_update_tools]
+  task_interrupt[task_interrupt]
+  END([END])
 ```
 
 ## Agent State
@@ -70,7 +79,7 @@ The graph is compiled with `InMemorySaver` for short-lived session memory.
 Callers must pass a thread id to retain state between turns:
 
 ```python
-result = graph.invoke(state, config={"configurable": {"thread_id": "session-1"}})
+result = graph.invoke(state, config={"configurable": {"thread_id": "session-1"}}, version="v2")
 ```
 
 This allows consecutive turns to reuse the stored message history. The
