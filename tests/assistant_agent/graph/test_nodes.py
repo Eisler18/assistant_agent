@@ -1,4 +1,5 @@
 
+from types import SimpleNamespace
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.tools import ToolException
@@ -6,6 +7,7 @@ import pytest
 
 from assistant_agent.graph.nodes import (
   intent_classifier_node,
+  session_initialiser_node,
   task_interrupt_node,
   task_create_node,
   task_read_node,
@@ -394,3 +396,103 @@ class TestTaskInterruptNode:
 
     assert result['messages'][0].content == \
       'No actionable tool call found. Please clarify your request.'
+
+
+# ------------------------------------------------------------------ #
+# Session initialiser node tests                                     #
+# ------------------------------------------------------------------ #
+class TestSessionInitialiserNode:
+  def test_session_initialiser_emits_briefing_on_first_run(self, monkeypatch):
+    briefing_tool = SimpleNamespace(
+      invoke=lambda _query: {
+        'overdue': [{ 'id': '1', 'title': 'Overdue', 'status': 'pending' }],
+        'today': [],
+        'unscheduled': [],
+        'upcoming': []
+      }
+    )
+    preview_tool = SimpleNamespace(invoke=lambda _query: 'Task: Overdue')
+
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.tools.get_daily_briefing_data',
+      briefing_tool
+    )
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.tools.format_task_preview',
+      preview_tool
+    )
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.config._briefing_enabled',
+      True
+    )
+
+    state = {
+      'messages': [HumanMessage(content='Hi')],
+      'intent': 'unknown'
+    }
+
+    result = session_initialiser_node(state)
+
+    assert result['briefing_shown'] is True
+    assert result['messages'][0].content == 'Overdue:\nTask: Overdue'
+    assert 'Today' not in result['messages'][0].content
+    assert 'Unscheduled' not in result['messages'][0].content
+    assert 'Upcoming' not in result['messages'][0].content
+
+  def test_session_initialiser_skips_on_second_run(self, monkeypatch):
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.config._briefing_enabled',
+      True
+    )
+    state = {
+      'messages': [HumanMessage(content='Hi')],
+      'intent': 'unknown',
+      'briefing_shown': True
+    }
+
+    result = session_initialiser_node(state)
+
+    assert not result
+
+  def test_session_initialiser_skips_when_feature_flag_off(self, monkeypatch):
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.config._briefing_enabled',
+      False
+    )
+    state = {
+      'messages': [HumanMessage(content='Hi')],
+      'intent': 'unknown'
+    }
+
+    result = session_initialiser_node(state)
+
+    assert not result
+
+  def test_session_initialiser_all_empty_emits_positive_message(self, monkeypatch):
+    briefing_tool = SimpleNamespace(
+      invoke=lambda _query: {
+        'overdue': [],
+        'today': [],
+        'unscheduled': [],
+        'upcoming': []
+      }
+    )
+
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.tools.get_daily_briefing_data',
+      briefing_tool
+    )
+    monkeypatch.setattr(
+      'assistant_agent.graph.nodes.config._briefing_enabled',
+      True
+    )
+
+    state = {
+      'messages': [HumanMessage(content='Hi')],
+      'intent': 'unknown'
+    }
+
+    result = session_initialiser_node(state)
+
+    assert result['briefing_shown'] is True
+    assert result['messages'][0].content == "You're all caught up! No pending tasks."
