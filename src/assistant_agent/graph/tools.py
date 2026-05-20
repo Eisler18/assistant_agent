@@ -293,7 +293,29 @@ def get_daily_briefing_data() -> dict:
   Returns: dict with lists of task dicts.
   Example: get_daily_briefing_data({})
   '''
-  return {}
+  overdue_filter = build_overdue_filter.invoke({})
+  overdue_tasks = Task.search(overdue_filter)
+
+  today_filter = build_today_filter.invoke({})
+  today_tasks = Task.search(today_filter)
+
+  upcoming_start = today_filter['planned_at_gte'] + timedelta(days=1)
+  upcoming_end = upcoming_start + timedelta(days=7) - timedelta(microseconds=1)
+  upcoming_filter: TaskFilter = {
+    'planned_at_gte': upcoming_start,
+    'planned_at_lte': upcoming_end
+  }
+  upcoming_tasks = Task.search(upcoming_filter)
+
+  unscheduled_filter = build_unscheduled_filter.invoke({})
+  unscheduled_tasks = Task.search(unscheduled_filter)
+
+  return {
+    'overdue': [task.to_dict() for task in overdue_tasks],
+    'today': [task.to_dict() for task in today_tasks],
+    'upcoming': [task.to_dict() for task in upcoming_tasks],
+    'unscheduled': [task.to_dict() for task in unscheduled_tasks]
+  }
 
 
 # --- Calendar output helpers --- #

@@ -114,6 +114,57 @@ def test_build_unscheduled_filter_tool():
   assert unscheduled['has_deadline'] is True
   assert unscheduled['has_planned_at'] is False
 
+# ------------------------------------------------------------------ #
+# Briefing Tool tests                                                #
+# ------------------------------------------------------------------ #
+def test_get_daily_briefing_data_returns_all_sections(monkeypatch):
+  overdue_task = DummyTask({ 'id': 'task-1', 'title': 'Overdue', 'status': 'pending' })
+  today_task = DummyTask({ 'id': 'task-2', 'title': 'Today', 'status': 'pending' })
+  upcoming_task = DummyTask({ 'id': 'task-3', 'title': 'Upcoming', 'status': 'pending' })
+  unscheduled_task = DummyTask({
+    'id': 'task-4',
+    'title': 'Unscheduled',
+    'status': 'pending'
+  })
+  search_mock = MagicMock(side_effect=[
+    [overdue_task],
+    [today_task],
+    [upcoming_task],
+    [unscheduled_task]
+  ])
+  monkeypatch.setattr(tools.Task, 'search', search_mock)
+
+  result = tools.get_daily_briefing_data.invoke({})
+
+  assert set(result.keys()) == { 'overdue', 'today', 'upcoming', 'unscheduled' }
+  assert result['overdue'] == [overdue_task.to_dict()]
+  assert result['today'] == [today_task.to_dict()]
+  assert result['upcoming'] == [upcoming_task.to_dict()]
+  assert result['unscheduled'] == [unscheduled_task.to_dict()]
+
+def test_get_daily_briefing_data_empty_sections(monkeypatch):
+  search_mock = MagicMock(side_effect=[[], [], [], []])
+  monkeypatch.setattr(tools.Task, 'search', search_mock)
+
+  result = tools.get_daily_briefing_data.invoke({})
+
+  assert result['overdue'] == []
+  assert result['today'] == []
+  assert result['upcoming'] == []
+  assert result['unscheduled'] == []
+
+def test_get_daily_briefing_data_overdue_section(monkeypatch):
+  overdue_task = DummyTask({ 'id': 'task-5', 'title': 'Late', 'status': 'pending' })
+  search_mock = MagicMock(side_effect=[[overdue_task], [], [], []])
+  monkeypatch.setattr(tools.Task, 'search', search_mock)
+
+  result = tools.get_daily_briefing_data.invoke({})
+
+  assert result['overdue'] == [overdue_task.to_dict()]
+  assert result['today'] == []
+  assert result['upcoming'] == []
+  assert result['unscheduled'] == []
+
 # ------------------------------------------------------------------- #
 # Task-related Tool tests                                             #
 # ------------------------------------------------------------------- #
