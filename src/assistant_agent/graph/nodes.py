@@ -117,7 +117,19 @@ def intent_classifier_node(state: AgentState) -> dict:
     *state['messages'],
   ]
   response = config.llm.invoke(messages)
-  return { 'intent': _parse_intent(getattr(response, 'content', None)) }
+  intent = _parse_intent(getattr(response, 'content', None))
+  if intent == 'unknown':
+    return {
+      'messages': [
+        AIMessage(content=(
+          'Sorry, I could not understand your intent. '
+          'Please clarify if you want to create, read, or update tasks.'
+        ))
+      ],
+      'intent': intent
+    }
+
+  return { 'intent': intent }
 
 def task_read_node(state: AgentState) -> dict:
   system_prompt = (
@@ -136,9 +148,8 @@ def task_read_node(state: AgentState) -> dict:
 def task_create_node(state: AgentState) -> dict:
   system_prompt = (
     'You are a task creation assistant. Gather the required title and any optional fields. '
-    'Initialize or modify the task first, then create it. '
-    'Do not parse dates yourself; always use the tools for that. '
-    'Always use the user-facing format for any task details.'
+    'Never parse dates yourself; always use the tools for that. '
+    'Always use the user-facing format for showing task details.'
   )
   messages = [SystemMessage(content=system_prompt), *state['messages']]
   llm_with_tools = config.llm.bind_tools(tools.TASK_CREATE_TOOLS)
@@ -152,12 +163,12 @@ def task_create_node(state: AgentState) -> dict:
 
 def task_update_node(state: AgentState) -> dict:
   system_prompt = (
-    'You are a task update assistant. '
+    'You are a task update and delete/cancel assistant. '
     'Identify the target task first using get_task or list_tasks. '
     'If multiple tasks match, ask the user to clarify which one. '
+    'Never parse dates yourself; always use the tools for that. '
     'Only use parse_date_range for filters, never for updating task fields. '
-    'Do not parse dates yourself; always use the tools for that. '
-    'Always use the user-facing format for any task details.'
+    'Always use the user-facing format for showing task details.'
   )
   messages = [SystemMessage(content=system_prompt), *state['messages']]
   llm_with_tools = config.llm.bind_tools(tools.TASK_UPDATE_TOOLS)
