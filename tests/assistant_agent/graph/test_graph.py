@@ -25,7 +25,6 @@ def test_graph_nodes_present():
   assert 'task_create_tools' in node_names
   assert 'task_update' in node_names
   assert 'task_update_tools' in node_names
-  assert 'task_delete' in node_names
 
 
 # ------------------------------------------------------------------ #
@@ -89,6 +88,14 @@ def test_should_continue():
   )
   assert should_continue(task_update_state) == 'task_update_tools'
 
+  task_delete_state = AgentState(
+    messages=[
+      AIMessage(content='Example', tool_calls=[{'name': 'delete_task', 'args': {}, 'id': '1'}])
+    ],
+    intent='task_update'
+  )
+  assert should_continue(task_delete_state) == 'task_interrupt'
+
   no_intent_state = AgentState(
     messages=[AIMessage(content='Example', tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}])],
     intent=None
@@ -144,5 +151,7 @@ def test_memory_saver_retains_messages(monkeypatch):
   graph.invoke(first_state, config=thread_config)
   result = graph.invoke(second_state, config=thread_config)
 
-  message_text = [message.content for message in result['messages']]
+  message_text = [
+    message.content for message in result['messages'] if isinstance(message, HumanMessage)
+  ]
   assert message_text == ['Hello', 'And tomorrow?']

@@ -32,6 +32,6 @@ class TestAgentState:
   def test_intent_literals_match_routes(self):
     intents = set(get_args(IntentType))
 
-    assert len(intents) == 5
+    assert len(intents) == 4
     assert 'unknown' in intents
     assert all(intent.startswith('task_') or intent == 'unknown' for intent in intents)

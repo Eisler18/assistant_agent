@@ -335,6 +335,7 @@ TASK_UPDATE_TOOLS = [
   get_task,
   list_tasks,
   update_task,
+  delete_task,
   parse_date_range,
   format_task_preview
 ]

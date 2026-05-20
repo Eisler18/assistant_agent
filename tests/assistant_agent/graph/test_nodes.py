@@ -182,10 +182,12 @@ class TestTaskUpdateNode:
       'get_task',
       'list_tasks',
       'update_task',
+      'delete_task',
       'parse_date_range',
       'format_task_preview'
     }
     assert expected_names == tool_names
+
 
 # ------------------------------------------------------------------ #
 # Task interrupt node tests                                          #
@@ -335,6 +337,60 @@ class TestTaskInterruptNode:
 
     with pytest.raises(
       ToolException,
-      match='Failed to retrieve current task details for task_id: None'
+      match='Failed to retrieve task details for task_id: None'
     ):
       task_interrupt_node(state)
+
+  def test_task_interrupt_delete_confirmation(self, monkeypatch):
+    class FakeTool:
+      def invoke(self, _query: str) -> dict:
+        return self.run(_query)
+
+      def run(self, _query: str) -> dict:
+        return { 'tasks': [{ 'title': 'Delete Me' }] }
+
+    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'yes')
+    monkeypatch.setattr('assistant_agent.graph.nodes.tools.get_task', FakeTool())
+
+    state = {
+      'messages': [
+        HumanMessage(content='Delete a task'),
+        AIMessage(
+          content='',
+          tool_calls=[
+            {
+              'name': 'delete_task',
+              'args': { 'task_id': '123' },
+              'id': '1'
+            }
+          ]
+        )
+      ],
+      'intent': 'task_delete'
+    }
+
+    result = task_interrupt_node(state)
+
+    assert result['confirmation'] is True
+    assert 'cancelled' not in result
+    assert 'messages' not in result
+
+  def test_task_interrupt_no_tool_calls(self, monkeypatch):
+    monkeypatch.setattr('assistant_agent.graph.nodes.interrupt', lambda _: 'yes')
+
+    state = {
+      'messages': [
+        HumanMessage(content='Perform an action'),
+        AIMessage(
+          content='',
+          tool_calls=[],
+          id='1'
+        )
+      ],
+      'intent': 'task_create'
+    }
+
+    result = task_interrupt_node(state)
+
+    assert result['messages'][0].content == \
+      'No actionable tool call found. Please clarify your request.'

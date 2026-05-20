@@ -7,7 +7,6 @@ IntentType = Literal[
   'task_create',
   'task_read',
   'task_update',
-  'task_delete',
   'unknown'
 ]
 

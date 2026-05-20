@@ -2,26 +2,44 @@
 
 ## Overview
 
-The graph is a LangGraph `StateGraph` with explicit node routing. Nodes orchestrate
-LLM decisions, while tools execute side effects such as repository calls or
-calendar link generation. Tool execution is managed through `ToolNode`.
+The graph is a LangGraph `StateGraph` with explicit node routing per intent. Nodes orchestrate
+LLM decisions, while tools execute side effects such as repository calls. Tool execution is
+managed through `ToolNode`.
 
 ## Topology
 
 ```mermaid
 flowchart TD
-  START([START]) --> intent_classifier[intent_classifier]
-  intent_classifier -->|task_crud| task_crud[task_crud]
-  intent_classifier -->|briefing| briefing[briefing]
-  intent_classifier -->|unknown| END([END])
+  START([START]) --> intent_classifier
+  intent_classifier --Create --> task_create
+  intent_classifier --Update --> task_update
+  intent_classifier --Read --> task_read
+  intent_classifier --Unknown --> END
 
-  task_crud -->|tool_calls| task_tools[task_tools]
-  task_tools --> task_crud
-  task_crud -->|no tool_calls| END
+  task_read --> END
+  task_create --> END
+  task_update --> END
+  task_interrupt --> END
 
-  briefing -->|tool_calls| briefing_tools[briefing_tools]
-  briefing_tools --> briefing
-  briefing -->|no tool_calls| END
+  task_read --Tools--> task_read_tools --> task_read
+  task_create --Other tools --> task_create_tools --> task_create
+  task_update --Other tools --> task_update_tools --> task_update
+
+  task_update -->|write tool| task_interrupt
+  task_create -->|write tool| task_interrupt
+  task_interrupt -->|confirm| task_create_tools
+  task_interrupt -->|confirm| task_update_tools
+  task_interrupt -->|cancel| END
+
+  intent_classifier[intent_classifier]
+  task_read[task_read]
+  task_create[task_create]
+  task_update[task_update]
+  task_read_tools[task_read_tools]
+  task_create_tools[task_create_tools]
+  task_update_tools[task_update_tools]
+  task_interrupt[task_interrupt]
+  END([END])
 ```
 
 ## Agent State
@@ -29,7 +47,9 @@ flowchart TD
 | Field | Type | Default | Owner | Notes |
 | --- | --- | --- | --- | --- |
 | `messages` | `list` (reducer: `add_messages`) | `[]` | All nodes | Full conversation history; reducer merges by message id. |
-| `intent` | `Literal['task_crud', 'briefing', 'unknown']` | `unknown` | Intent classifier | Drives the routing decision after classification. |
+| `intent` | `Literal['task_create', 'task_read', 'task_update', 'unknown']` | `unknown` | Intent classifier | Drives the routing decision after classification. |
+| `confirmation` | `bool | None` | `None` | Interrupt node | Set when the user confirms a write action. |
+| `cancelled` | `bool | None` | `None` | Interrupt node | Set when the user cancels a write action. |
 
 ## Tools
 
@@ -39,21 +59,19 @@ flowchart TD
 | Task CRUD | `get_task` | Retrieve a task by id. |
 | Task CRUD | `list_tasks` | List tasks using structured filters. |
 | Task CRUD | `update_task` | Update task fields (including rescheduling). |
-| Task CRUD | `delete_task` | Soft-delete a task by id. |
-| Filter builders | `parse_date` | Parse a natural language date into an ISO datetime. |
+| Task CRUD | `delete_task` | Soft-delete a task by id (used via the update toolset). |
 | Filter builders | `parse_date_range` | Parse a natural language date range into ISO bounds. |
 | Filter builders | `build_overdue_filter` | Build a filter for overdue tasks. |
 | Filter builders | `build_today_filter` | Build a filter for tasks planned for today. |
 | Filter builders | `build_unscheduled_filter` | Build a filter for tasks with deadlines but no plan. |
-| Briefing | `get_daily_briefing_data` | Summarize overdue, today, upcoming, and unscheduled tasks. |
-| Calendar | `generate_calendar_link` | Generate a quick-add calendar link. |
 
 ## Routing Logic
 
 - `intent_classifier` sets `state['intent']` based on the user prompt.
-- `route_by_intent` sends the state to `task_crud`, `briefing`, or `END`.
-- `should_continue` inspects the last message and routes to the tool node if
-  tool calls are present, otherwise it ends the run.
+- `route_by_intent` sends the state to `task_read`, `task_create`, `task_update`, or `END`.
+- `should_continue` inspects the last message and routes to the tool node if tool calls are
+  present; write tools (`create_task`, `update_task`, `delete_task`) route to the interrupt.
+- `should_save_task` decides whether to proceed with the write tools after confirmation.
 
 ## MemorySaver Checkpointing
 
@@ -61,7 +79,7 @@ The graph is compiled with `InMemorySaver` for short-lived session memory.
 Callers must pass a thread id to retain state between turns:
 
 ```python
-result = graph.invoke(state, config={"configurable": {"thread_id": "session-1"}})
+result = graph.invoke(state, config={"configurable": {"thread_id": "session-1"}}, version="v2")
 ```
 
 This allows consecutive turns to reuse the stored message history. The
@@ -79,7 +97,7 @@ An explicit node topology was chosen over a single ReAct agent because it:
 ## Monitoring: LangSmith
 
 This project uses LangSmith to capture execution traces for LangGraph runs in non-test
-scenarios. Each node invocation (intent classifier, tool loops, and terminal responses)
+scenarios. Each node invocation (intent classifier, tool loops, and interrupt responses)
 appears as a separate span, which makes routing decisions and tool usage easy to inspect
 and cite in the thesis.
 
