@@ -151,5 +151,7 @@ def test_memory_saver_retains_messages(monkeypatch):
   graph.invoke(first_state, config=thread_config)
   result = graph.invoke(second_state, config=thread_config)
 
-  message_text = [message.content for message in result['messages']]
+  message_text = [
+    message.content for message in result['messages'] if isinstance(message, HumanMessage)
+  ]
   assert message_text == ['Hello', 'And tomorrow?']
