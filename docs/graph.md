@@ -10,7 +10,9 @@ managed through `ToolNode`.
 
 ```mermaid
 flowchart TD
-  START([START]) --> intent_classifier
+  START([START]) --> session_initialiser
+  session_initialiser --No user message--> END
+  session_initialiser --Has user message--> intent_classifier
   intent_classifier --Create --> task_create
   intent_classifier --Update --> task_update
   intent_classifier --Read --> task_read
@@ -39,6 +41,7 @@ flowchart TD
   task_create_tools[task_create_tools]
   task_update_tools[task_update_tools]
   task_interrupt[task_interrupt]
+  session_initialiser[session_initialiser]
   END([END])
 ```
 
@@ -50,6 +53,7 @@ flowchart TD
 | `intent` | `Literal['task_create', 'task_read', 'task_update', 'unknown']` | `unknown` | Intent classifier | Drives the routing decision after classification. |
 | `confirmation` | `bool | None` | `None` | Interrupt node | Set when the user confirms a write action. |
 | `cancelled` | `bool | None` | `None` | Interrupt node | Set when the user cancels a write action. |
+| `briefing_shown` | `bool` | `False` | Session initialiser | Prevents re-emitting the daily briefing in the same session. |
 
 ## Tools
 
@@ -64,9 +68,12 @@ flowchart TD
 | Filter builders | `build_overdue_filter` | Build a filter for overdue tasks. |
 | Filter builders | `build_today_filter` | Build a filter for tasks planned for today. |
 | Filter builders | `build_unscheduled_filter` | Build a filter for tasks with deadlines but no plan. |
+| Briefing | `get_daily_briefing_data` | Return `{overdue,today,upcoming,unscheduled}` arrays of task dicts. |
 
 ## Routing Logic
 
+- `session_initialiser` emits a briefing once per session and ends the graph when no user
+  message is present.
 - `intent_classifier` sets `state['intent']` based on the user prompt.
 - `route_by_intent` sends the state to `task_read`, `task_create`, `task_update`, or `END`.
 - `should_continue` inspects the last message and routes to the tool node if tool calls are
@@ -126,3 +133,11 @@ Tests disable tracing to keep the suite isolated and deterministic. Traces are o
 recorded for real runs launched from scripts or a REPL.
 
 Trace example: https://eu.smith.langchain.com/public/b80c96ad-810a-432a-a5fc-67193223ab40/r
+
+## Session Initialiser
+
+The `session_initialiser` node runs at session start, emits a single briefing message, and
+sets `briefing_shown=True` in state. If no `HumanMessage` exists in state, the graph ends
+after the briefing; the next user message triggers intent classification in a new invocation.
+When a user message is present, the graph proceeds to `intent_classifier` immediately after
+the briefing.
