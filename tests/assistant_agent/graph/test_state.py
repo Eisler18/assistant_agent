@@ -8,10 +8,15 @@ class TestAgentState:
   def test_agent_state_instantiation(self):
     state: AgentState = {
       'messages': [HumanMessage(content='Hi', id='1')],
-      'intent': 'unknown'
+      'intent': 'unknown',
+      'briefing_shown': False
     }
 
     assert state['intent'] == 'unknown'
+    assert state['briefing_shown'] is False
+    assert len(state['messages']) == 1
+    assert 'confirmation' not in state
+    assert 'cancelled' not in state
 
   def test_add_messages_merges_by_id(self):
     first = HumanMessage(content='First', id='1')

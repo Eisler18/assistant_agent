@@ -3,7 +3,13 @@ from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph import END
 
-from assistant_agent.graph.graph import graph, route_by_intent, should_continue, should_save_task
+from assistant_agent.graph.graph import (
+  graph,
+  route_after_initialiser,
+  route_by_intent,
+  should_continue,
+  should_save_task
+)
 from assistant_agent.graph.state import AgentState
 from assistant_agent.config import Config
 
@@ -17,6 +23,7 @@ def test_graph_nodes_present():
   graph_def = graph.get_graph()
   node_names = set(graph_def.nodes.keys())
 
+  assert 'session_initialiser' in node_names
   assert 'intent_classifier' in node_names
   assert 'task_read' in node_names
   assert 'task_read_tools' in node_names
@@ -30,6 +37,13 @@ def test_graph_nodes_present():
 # ------------------------------------------------------------------ #
 # Routing tests                                                      #
 # ------------------------------------------------------------------ #
+def test_route_after_initialiser():
+  state = AgentState(messages=[], intent='unknown')
+  assert route_after_initialiser(state) == END
+
+  state = AgentState(messages=[HumanMessage(content='Hi')], intent='unknown')
+  assert route_after_initialiser(state) == 'intent_classifier'
+
 def test_route_by_intent():
   task_read_state = AgentState(messages=[], intent='task_read')
   assert route_by_intent(task_read_state) == 'task_read'
@@ -136,6 +150,10 @@ def test_memory_saver_retains_messages(monkeypatch):
     messages=iter([AIMessage(content='unknown'), AIMessage(content='unknown')])
   )
   monkeypatch.setattr(Config, 'llm', fake_llm)
+  monkeypatch.setattr(
+    'assistant_agent.graph.nodes.config._briefing_enabled',
+    False
+  )
 
   thread_config = { 'configurable': { 'thread_id': 'test-thread' } }
 

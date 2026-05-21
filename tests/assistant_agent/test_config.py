@@ -14,6 +14,7 @@ class TestConfig:
     assert config is not None
     assert config._llm is None
     assert config.timezone == 'UTC'
+    assert config.briefing_enabled is True
 
   def test_config_google_llm_initialization(self, monkeypatch):
     monkeypatch.delenv('LLM_API_KEY', raising=False)
@@ -37,4 +38,17 @@ class TestConfig:
     llm_instance = config.llm
     assert llm_instance is not None
     assert isinstance(config._llm, ChatOpenAI)
+
+  def test_config_briefing_enabled_parsing(self, monkeypatch):
+    monkeypatch.setenv('BRIEFING_ENABLED', 'true')
+    config = Config()
+    assert config.briefing_enabled is True
+
+    monkeypatch.setenv('BRIEFING_ENABLED', 'false')
+    config = Config()
+    assert config.briefing_enabled is False
+
+    monkeypatch.delenv('BRIEFING_ENABLED', raising=False)
+    config = Config()
+    assert config.briefing_enabled is True
 # pylint: enable=protected-access

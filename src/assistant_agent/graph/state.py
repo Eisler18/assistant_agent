@@ -15,3 +15,4 @@ class AgentState(TypedDict):
   intent: IntentType
   confirmation: bool | None
   cancelled: bool | None
+  briefing_shown: bool

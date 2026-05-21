@@ -1,10 +1,11 @@
 
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode
 from .nodes import (
   intent_classifier_node,
+  session_initialiser_node,
   task_create_node,
   task_interrupt_node,
   task_read_node,
@@ -76,6 +77,12 @@ def should_save_task(state: AgentState) -> str:
 
   return result
 
+def route_after_initialiser(state: AgentState) -> str:
+  messages = state.get('messages', [])
+  if any(isinstance(message, HumanMessage) for message in messages):
+    return 'intent_classifier'
+  return END
+
 
 # --- Tool nodes --- #
 _task_read_tools = ToolNode(tools.TASK_READ_TOOLS)
@@ -84,6 +91,7 @@ _task_update_tools = ToolNode(tools.TASK_UPDATE_TOOLS)
 
 # --- Graph construction --- #
 _builder = StateGraph(AgentState)
+_builder.add_node('session_initialiser', session_initialiser_node)
 _builder.add_node('intent_classifier', intent_classifier_node)
 _builder.add_node('task_read', task_read_node)
 _builder.add_node('task_read_tools', _task_read_tools)
@@ -93,7 +101,15 @@ _builder.add_node('task_create_tools', _task_create_tools)
 _builder.add_node('task_update', task_update_node)
 _builder.add_node('task_update_tools', _task_update_tools)
 
-_builder.add_edge(START, 'intent_classifier')
+_builder.add_edge(START, 'session_initialiser')
+_builder.add_conditional_edges(
+  'session_initialiser',
+  route_after_initialiser,
+  {
+    'intent_classifier': 'intent_classifier',
+    END: END
+  }
+)
 _builder.add_conditional_edges(
   'intent_classifier',
   route_by_intent,

@@ -10,6 +10,7 @@ load_dotenv()
 class Config:
   def __init__(self):
     self._timezone = os.getenv('AGENT_TIMEZONE', 'UTC')
+    self._briefing_enabled = os.getenv('BRIEFING_ENABLED', 'true').lower() == 'true'
     self._llm = None  # Lazy-loaded LLM instance
 
   @property
@@ -35,3 +36,7 @@ class Config:
   @property
   def timezone(self):
     return self._timezone
+
+  @property
+  def briefing_enabled(self):
+    return self._briefing_enabled
