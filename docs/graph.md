@@ -11,8 +11,8 @@ managed through `ToolNode`.
 ```mermaid
 flowchart TD
   START([START]) --> session_initialiser
-  session_initialiser --No user message--> END
-  session_initialiser --Has user message--> intent_classifier
+  session_initialiser --Briefing--> END
+  session_initialiser --Briefing already shown--> intent_classifier
   intent_classifier --Create --> task_create
   intent_classifier --Update --> task_update
   intent_classifier --Read --> task_read

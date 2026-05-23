@@ -103,38 +103,29 @@ def _handle_delete_interrupt(target_call: dict) -> dict:
   cancel_message = f'Deletion of task "{task_title}" cancelled.'
   return _confirm_preview(question, details, cancel_message)
 
-def _format_briefing(data: dict) -> str:
-  sections = [
-    ('Overdue', data.get('overdue', [])),
-    ('Today', data.get('today', [])),
-    ('Unscheduled', data.get('unscheduled', [])),
-    ('Upcoming (next 7 days)', data.get('upcoming', []))
-  ]
-  if all(not tasks for _, tasks in sections):
-    return "You're all caught up! No pending tasks."
-
-  lines = []
-  for title, tasks in sections:
-    if not tasks:
-      continue
-    preview = tools.format_task_preview.invoke({ 'tasks': tasks })
-    lines.append(f'{title}:\n{preview}')
-  return '\n\n'.join(lines)
-
 
 # --- Graph nodes --- #
 def session_initialiser_node(state: AgentState) -> dict:
-  if not config.briefing_enabled:
-    return {}
-  if state.get('briefing_shown', False):
-    return {}
+  if not config.briefing_enabled or state.get('briefing_shown', False):
+    return { 'briefing_shown': True }
 
-  data = tools.get_daily_briefing_data.invoke({})
-  message = _format_briefing(data)
-  return {
-    'messages': [AIMessage(content=message)],
-    'briefing_shown': True
-  }
+  system_prompt = (
+    'You are a session initialiser for a personal assistant agent. '
+    'Provide the user with a daily briefing of their tasks. '
+    'Use the get_daily_briefing_data tool to retrieve structured task data, ' \
+    'then format it into a concise message using the format_task_preview tool. '
+    'Also suggest new dates for overdue and unscheduled tasks to help the user plan their day'
+  )
+
+  messages = [SystemMessage(content=system_prompt), *state['messages']]
+  llm_with_tools = config.llm.bind_tools(tools.BRIEFING_TOOLS)
+  response = llm_with_tools.invoke(messages)
+  sanitized = _sanitize_tool_calls(response)
+  return { 'messages': [sanitized] }
+
+def after_initialiser_node(state: AgentState) -> dict:
+  _ = state
+  return { 'briefing_shown': True }
 
 def intent_classifier_node(state: AgentState) -> dict:
   messages = [

@@ -26,13 +26,16 @@ def main() -> None:
   repository = JsonRepository(file_name='tasks.json')
   Task.set_repository(repository)
   config = { "configurable": { "thread_id": "initializer-tests" } }
-  state = AgentState(messages=[])
+  state = AgentState(messages=[HumanMessage(content='Generate a daily briefing of my tasks')])
   interruption = False
 
   print('\nInteractive graph runner. Type /exit to quit.\n')
-  print('Welcome! Here is your briefing:')
-  initial_message = graph.invoke(state, config=config, version='v2').value['messages'][0]
-  print(f'{initial_message.content}\n')
+
+  result = graph.invoke(state, config=config, version='v2')
+  state = result.value if result.value else state
+  initial_message = state['messages'][-1] if state['messages'] else None
+  if initial_message:
+    print(f'{initial_message.content}\n')
 
   while True:
     user_input = input('You: ').strip()
