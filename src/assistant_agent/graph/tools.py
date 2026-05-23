@@ -282,7 +282,18 @@ def build_unscheduled_filter() -> dict:
   Returns: {'has_deadline': True, 'has_planned_at': False}.
   Example: build_unscheduled_filter({})
   '''
-  return { 'has_deadline': True, 'has_planned_at': False }
+  return { 'has_deadline': True, 'has_planned_at': False, 'status': 'pending' }
+
+@tool
+def build_stale_filter() -> dict:
+  '''Return a filter dict for tasks with stale planned dates.
+
+  A task is stale when planned_at < now and status is pending.
+
+  Returns: {'planned_at_lte': <now_utc>, 'status': 'pending'}.
+  Example: build_stale_filter({})
+  '''
+  return { 'planned_at_lte': datetime.now(UTC), 'status': 'pending' }
 
 
 # --- Briefing --- #
@@ -310,11 +321,15 @@ def get_daily_briefing_data() -> dict:
   unscheduled_filter = build_unscheduled_filter.invoke({})
   unscheduled_tasks = Task.search(unscheduled_filter)
 
+  stale_filter = build_stale_filter.invoke({})
+  stale_tasks = Task.search(stale_filter)
+
   return {
     'overdue': [task.to_dict() for task in overdue_tasks],
     'today': [task.to_dict() for task in today_tasks],
     'upcoming': [task.to_dict() for task in upcoming_tasks],
-    'unscheduled': [task.to_dict() for task in unscheduled_tasks]
+    'unscheduled': [task.to_dict() for task in unscheduled_tasks],
+    'stale': [task.to_dict() for task in stale_tasks]
   }
 
 
@@ -344,6 +359,7 @@ TASK_READ_TOOLS = [
   build_overdue_filter,
   build_today_filter,
   build_unscheduled_filter,
+  build_stale_filter,
   format_task_preview
 ]
 
