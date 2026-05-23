@@ -376,7 +376,8 @@ TASK_READ_TOOLS = [
 TASK_CREATE_TOOLS = [
   create_task,
   new_task,
-  format_task_preview
+  format_task_preview,
+  generate_calendar_link
 ]
 
 TASK_UPDATE_TOOLS = [
@@ -385,7 +386,8 @@ TASK_UPDATE_TOOLS = [
   update_task,
   delete_task,
   parse_date_range,
-  format_task_preview
+  format_task_preview,
+  generate_calendar_link
 ]
 
 BRIEFING_TOOLS = [

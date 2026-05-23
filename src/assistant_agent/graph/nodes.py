@@ -174,7 +174,9 @@ def task_create_node(state: AgentState) -> dict:
   system_prompt = (
     'You are a task creation assistant. Gather the required title and any optional fields. '
     'Never parse dates yourself; always use the tools for that. '
-    'Always use the user-facing format for showing task details.'
+    'Always use the user-facing format for showing task details. '
+    'After a task is successfully created, always offer the user a Google Calendar link using '
+    'generate_calendar_link.'
   )
   messages = [SystemMessage(content=system_prompt), *state['messages']]
   llm_with_tools = config.llm.bind_tools(tools.TASK_CREATE_TOOLS)
@@ -193,7 +195,9 @@ def task_update_node(state: AgentState) -> dict:
     'If multiple tasks match, ask the user to clarify which one. '
     'Never parse dates yourself; always use the tools for that. '
     'Only use parse_date_range for filters, never for updating task fields. '
-    'Always use the user-facing format for showing task details.'
+    'Always use the user-facing format for showing task details. '
+    'After a successful update that changes planned_at or estimated_minutes, '
+    'always offer a refreshed Google Calendar link using generate_calendar_link.'
   )
   messages = [SystemMessage(content=system_prompt), *state['messages']]
   llm_with_tools = config.llm.bind_tools(tools.TASK_UPDATE_TOOLS)

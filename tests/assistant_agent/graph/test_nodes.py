@@ -148,7 +148,8 @@ class TestTaskCreateNode:
     expected_names = {
       'create_task',
       'new_task',
-      'format_task_preview'
+      'format_task_preview',
+      'generate_calendar_link'
     }
     assert expected_names == tool_names
 
@@ -187,7 +188,8 @@ class TestTaskUpdateNode:
       'update_task',
       'delete_task',
       'parse_date_range',
-      'format_task_preview'
+      'format_task_preview',
+      'generate_calendar_link'
     }
     assert expected_names == tool_names
 
