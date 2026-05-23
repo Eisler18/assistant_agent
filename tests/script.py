@@ -25,7 +25,7 @@ def _print_interrupt(interrupt) -> None:
 def main() -> None:
   repository = JsonRepository(file_name='tasks.json')
   Task.set_repository(repository)
-  config = { "configurable": { "thread_id": "initializer-tests" } }
+  config = { "configurable": { "thread_id": "calendar-tests" } }
   state = AgentState(messages=[HumanMessage(content='Generate a daily briefing of my tasks')])
   interruption = False
 
@@ -59,8 +59,8 @@ def main() -> None:
       _print_last_message(state['messages'])
       interruption = False
 
-    if len(state['messages']) > 10:
-      state['messages'] = state['messages'][-10:]
+    if len(state['messages']) > 5:
+      state['messages'] = state['messages'][-5:]
 
 if __name__ == '__main__':
   main()

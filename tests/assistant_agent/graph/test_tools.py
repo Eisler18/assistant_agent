@@ -1,5 +1,7 @@
 
 from datetime import datetime, timedelta, timezone
+import re
+from urllib.parse import parse_qs, urlparse
 from unittest.mock import MagicMock
 import pytest
 from assistant_agent import utils
@@ -110,9 +112,83 @@ def test_build_today_filter_tool():
 def test_build_unscheduled_filter_tool():
   unscheduled = tools.build_unscheduled_filter.invoke({})
   assert isinstance(unscheduled, dict)
-  assert { 'has_deadline', 'has_planned_at' }.issubset(unscheduled.keys())
+  assert { 'has_deadline', 'has_planned_at', 'status' }.issubset(unscheduled.keys())
   assert unscheduled['has_deadline'] is True
   assert unscheduled['has_planned_at'] is False
+  assert unscheduled['status'] == 'pending'
+
+def test_build_stale_filter_tool():
+  stale = tools.build_stale_filter.invoke({})
+
+  assert isinstance(stale, dict)
+  assert { 'planned_at_lte', 'status' }.issubset(stale.keys())
+  assert stale['status'] == 'pending'
+  assert isinstance(stale['planned_at_lte'], datetime)
+  now = datetime.now(tools.UTC)
+  delta = abs((stale['planned_at_lte'] - now).total_seconds())
+  assert delta <= 5
+  assert stale['planned_at_lte'].tzinfo == tools.UTC
+
+# ------------------------------------------------------------------ #
+# Calendar link tests                                                #
+# ------------------------------------------------------------------ #
+def test_generate_calendar_link_basic(monkeypatch):
+  monkeypatch.setattr(
+    'assistant_agent.graph.tools.Task.find',
+    lambda task_id: DummyTask({
+      'id': task_id,
+      'title': 'Write chapter',
+      'description': 'Draft the introduction section',
+      'planned_at': '2026-05-23T10:00:00+00:00',
+      'estimated_minutes': 90
+    })
+  )
+  url = tools.generate_calendar_link.invoke({ 'task_id': 'task_123' })
+
+  parsed = urlparse(url)
+  query = parse_qs(parsed.query)
+
+  assert 'text' in query
+  assert query['text'][0] == 'Write chapter'
+  assert 'details' in query
+  assert query['details'][0] == 'Draft the introduction section'
+  assert 'dates' in query
+  assert re.fullmatch(r'\d{8}T\d{6}Z/\d{8}T\d{6}Z', query['dates'][0])
+
+  monkeypatch.setattr(
+    'assistant_agent.graph.tools.Task.find',
+    lambda task_id: DummyTask({
+      'id': task_id,
+      'title': 'Write chapter',
+      'description': 'Draft the introduction section'
+    })
+  )
+  url = tools.generate_calendar_link.invoke({ 'task_id': 'task_123' })
+
+  parsed = urlparse(url)
+  query = parse_qs(parsed.query)
+
+  assert 'dates' not in query
+
+  monkeypatch.setattr(
+    'assistant_agent.graph.tools.Task.find',
+    lambda task_id: DummyTask({
+      'id': task_id,
+      'title': 'Write chapter',
+      'description': 'Draft the introduction section',
+      'planned_at': '2026-05-23T10:00:00+00:00'
+    })
+  )
+  url = tools.generate_calendar_link.invoke({ 'task_id': 'task_123' })
+
+  parsed = urlparse(url)
+  query = parse_qs(parsed.query)
+
+  dates = query['dates'][0].split('/')
+  start = datetime.strptime(dates[0], '%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
+  end = datetime.strptime(dates[1], '%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
+
+  assert end - start == timedelta(minutes=60)
 
 # ------------------------------------------------------------------ #
 # Briefing Tool tests                                                #
@@ -126,24 +202,31 @@ def test_get_daily_briefing_data_returns_all_sections(monkeypatch):
     'title': 'Unscheduled',
     'status': 'pending'
   })
+  stale_task = DummyTask({
+    'id': 'task-5',
+    'title': 'Stale',
+    'status': 'pending'
+  })
   search_mock = MagicMock(side_effect=[
     [overdue_task],
     [today_task],
     [upcoming_task],
-    [unscheduled_task]
+    [unscheduled_task],
+    [stale_task]
   ])
   monkeypatch.setattr(tools.Task, 'search', search_mock)
 
   result = tools.get_daily_briefing_data.invoke({})
 
-  assert set(result.keys()) == { 'overdue', 'today', 'upcoming', 'unscheduled' }
+  assert set(result.keys()) == { 'overdue', 'today', 'upcoming', 'unscheduled', 'stale' }
   assert result['overdue'] == [overdue_task.to_dict()]
   assert result['today'] == [today_task.to_dict()]
   assert result['upcoming'] == [upcoming_task.to_dict()]
   assert result['unscheduled'] == [unscheduled_task.to_dict()]
+  assert result['stale'] == [stale_task.to_dict()]
 
 def test_get_daily_briefing_data_empty_sections(monkeypatch):
-  search_mock = MagicMock(side_effect=[[], [], [], []])
+  search_mock = MagicMock(side_effect=[[], [], [], [], []])
   monkeypatch.setattr(tools.Task, 'search', search_mock)
 
   result = tools.get_daily_briefing_data.invoke({})
@@ -152,10 +235,11 @@ def test_get_daily_briefing_data_empty_sections(monkeypatch):
   assert result['today'] == []
   assert result['upcoming'] == []
   assert result['unscheduled'] == []
+  assert result['stale'] == []
 
 def test_get_daily_briefing_data_overdue_section(monkeypatch):
   overdue_task = DummyTask({ 'id': 'task-5', 'title': 'Late', 'status': 'pending' })
-  search_mock = MagicMock(side_effect=[[overdue_task], [], [], []])
+  search_mock = MagicMock(side_effect=[[overdue_task], [], [], [], []])
   monkeypatch.setattr(tools.Task, 'search', search_mock)
 
   result = tools.get_daily_briefing_data.invoke({})
@@ -164,6 +248,7 @@ def test_get_daily_briefing_data_overdue_section(monkeypatch):
   assert result['today'] == []
   assert result['upcoming'] == []
   assert result['unscheduled'] == []
+  assert result['stale'] == []
 
 # ------------------------------------------------------------------- #
 # Task-related Tool tests                                             #
