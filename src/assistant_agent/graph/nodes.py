@@ -103,24 +103,6 @@ def _handle_delete_interrupt(target_call: dict) -> dict:
   cancel_message = f'Deletion of task "{task_title}" cancelled.'
   return _confirm_preview(question, details, cancel_message)
 
-def _format_briefing(data: dict) -> str:
-  sections = [
-    ('Overdue', data.get('overdue', [])),
-    ('Today', data.get('today', [])),
-    ('Unscheduled', data.get('unscheduled', [])),
-    ('Upcoming (next 7 days)', data.get('upcoming', []))
-  ]
-  if all(not tasks for _, tasks in sections):
-    return "You're all caught up! No pending tasks."
-
-  lines = []
-  for title, tasks in sections:
-    if not tasks:
-      continue
-    preview = tools.format_task_preview.invoke({ 'tasks': tasks })
-    lines.append(f'{title}:\n{preview}')
-  return '\n\n'.join(lines)
-
 
 # --- Graph nodes --- #
 def session_initialiser_node(state: AgentState) -> dict:
