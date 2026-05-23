@@ -1,5 +1,6 @@
 
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote, urlencode
 from langchain_core.tools import tool
 from ..models import Task
 from ..repository import TaskFilter
@@ -334,23 +335,32 @@ def get_daily_briefing_data() -> dict:
 
 
 # --- Calendar output helpers --- #
-@tool
-def generate_calendar_link(
-  title: str | None = None,
-  start_time: str | None = None,
-  duration_minutes: int | None = None,
-  focus_time: bool = False,
-  task_id: str | None = None
-) -> str:
-  '''Generate a Google Calendar quick-add link for a calendar event.
+_GCAL_BASE_URL = 'https://calendar.google.com/calendar/r/eventedit'
 
-  Params: title (str|None), start_time (str|None), duration_minutes (int|None),
-    focus_time (bool), task_id (str|None).
+def _format_gcal_dt(dt: datetime) -> str:
+  '''Format a UTC datetime to YYYYMMDDTHHMMSSZ (Google Calendar format).'''
+  return dt.astimezone(UTC).strftime('%Y%m%dT%H%M%SZ')
+
+@tool
+def generate_calendar_link(task_id: str) -> str:
+  '''Generate a Google Calendar quick-add link for a task.
+
+  Params: task_id (str).
   Returns: URL string.
-  Example: generate_calendar_link({"title": "Write", "start_time": "tomorrow 10am"})
+  Example: generate_calendar_link("task_123")
   '''
-  _ = (title, start_time, duration_minutes, focus_time, task_id)
-  return ''
+  task = get_task.invoke({'task_id': task_id})['tasks'][0]
+  title = task['title']
+  description = task.get('description', None) or ''
+  start_time = task.get('planned_at', None)
+  duration_minutes = task.get('estimated_minutes', None) or 60
+
+  params = { 'text': title, 'details': description }
+  if start_time is not None:
+    start_dt = coerce_datetime(start_time)
+    end_dt = start_dt + timedelta(minutes=duration_minutes)
+    params['dates'] = f"{_format_gcal_dt(start_dt)}/{_format_gcal_dt(end_dt)}"
+  return f"{_GCAL_BASE_URL}?{urlencode(params, quote_via=quote)}"
 
 TASK_READ_TOOLS = [
   list_tasks,
