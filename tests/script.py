@@ -30,9 +30,12 @@ def main() -> None:
   interruption = False
 
   print('\nInteractive graph runner. Type /exit to quit.\n')
-  print('Welcome! Here is your briefing:')
-  initial_message = graph.invoke(state, config=config, version='v2').value['messages'][-1]
-  print(f'{initial_message.content}\n')
+
+  result = graph.invoke(state, config=config, version='v2')
+  state = result.value if result.value else state
+  initial_message = state['messages'][-1] if state['messages'] else None
+  if initial_message:
+    print(f'{initial_message.content}\n')
 
   while True:
     user_input = input('You: ').strip()
