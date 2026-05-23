@@ -361,3 +361,8 @@ TASK_UPDATE_TOOLS = [
   parse_date_range,
   format_task_preview
 ]
+
+BRIEFING_TOOLS = [
+  get_daily_briefing_data,
+  format_task_preview
+]

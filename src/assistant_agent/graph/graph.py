@@ -4,6 +4,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode
 from .nodes import (
+  after_initialiser_node,
   intent_classifier_node,
   session_initialiser_node,
   task_create_node,
@@ -78,20 +79,28 @@ def should_save_task(state: AgentState) -> str:
   return result
 
 def route_after_initialiser(state: AgentState) -> str:
-  messages = state.get('messages', [])
-  if any(isinstance(message, HumanMessage) for message in messages):
+  if state.get('briefing_shown', False):
     return 'intent_classifier'
-  return END
+
+  messages = state.get('messages', [])
+  last_message = messages[-1] if messages else None
+  if _has_tool_calls(last_message):
+    return 'briefing_tools'
+
+  return 'after_initialiser'
 
 
 # --- Tool nodes --- #
 _task_read_tools = ToolNode(tools.TASK_READ_TOOLS)
 _task_create_tools = ToolNode(tools.TASK_CREATE_TOOLS)
 _task_update_tools = ToolNode(tools.TASK_UPDATE_TOOLS)
+_briefing_tools = ToolNode(tools.BRIEFING_TOOLS)
 
 # --- Graph construction --- #
 _builder = StateGraph(AgentState)
 _builder.add_node('session_initialiser', session_initialiser_node)
+_builder.add_node('after_initialiser', after_initialiser_node)
+_builder.add_node('briefing_tools', _briefing_tools)
 _builder.add_node('intent_classifier', intent_classifier_node)
 _builder.add_node('task_read', task_read_node)
 _builder.add_node('task_read_tools', _task_read_tools)
@@ -106,10 +115,14 @@ _builder.add_conditional_edges(
   'session_initialiser',
   route_after_initialiser,
   {
+    'briefing_tools': 'briefing_tools',
     'intent_classifier': 'intent_classifier',
-    END: END
+    'after_initialiser': 'after_initialiser'
   }
 )
+_builder.add_edge('briefing_tools', 'session_initialiser')
+_builder.add_edge('after_initialiser', END)
+
 _builder.add_conditional_edges(
   'intent_classifier',
   route_by_intent,

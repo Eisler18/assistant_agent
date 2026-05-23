@@ -124,17 +124,25 @@ def _format_briefing(data: dict) -> str:
 
 # --- Graph nodes --- #
 def session_initialiser_node(state: AgentState) -> dict:
-  if not config.briefing_enabled:
-    return {}
-  if state.get('briefing_shown', False):
-    return {}
+  if not config.briefing_enabled or state.get('briefing_shown', False):
+    return { 'briefing_shown': True }
 
-  data = tools.get_daily_briefing_data.invoke({})
-  message = _format_briefing(data)
-  return {
-    'messages': [AIMessage(content=message)],
-    'briefing_shown': True
-  }
+  system_prompt = (
+    'You are a session initialiser for a personal assistant agent. '
+    'Provide the user with a daily briefing of their tasks. '
+    'Use the get_daily_briefing_data tool to retrieve structured task data, ' \
+    'then format it into a concise message using the format_task_preview tool. '
+    'Suggest new dates for overdue and unscheduled tasks to help the user plan their day'
+  )
+
+  messages = [SystemMessage(content=system_prompt), *state['messages']]
+  llm_with_tools = config.llm.bind_tools(tools.BRIEFING_TOOLS)
+  response = llm_with_tools.invoke(messages)
+  sanitized = _sanitize_tool_calls(response)
+  return { 'messages': [sanitized] }
+
+def after_initialiser_node(state: AgentState) -> dict:
+  return { 'briefing_shown': True }
 
 def intent_classifier_node(state: AgentState) -> dict:
   messages = [
