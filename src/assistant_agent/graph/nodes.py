@@ -124,6 +124,7 @@ def session_initialiser_node(state: AgentState) -> dict:
   return { 'messages': [sanitized] }
 
 def after_initialiser_node(state: AgentState) -> dict:
+  _ = state
   return { 'briefing_shown': True }
 
 def intent_classifier_node(state: AgentState) -> dict:

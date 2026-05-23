@@ -38,11 +38,16 @@ def test_graph_nodes_present():
 # Routing tests                                                      #
 # ------------------------------------------------------------------ #
 def test_route_after_initialiser():
-  state = AgentState(messages=[], intent='unknown')
-  assert route_after_initialiser(state) == END
+  state = AgentState(messages=[])
+  assert route_after_initialiser(state) == 'after_initialiser'
 
-  state = AgentState(messages=[HumanMessage(content='Hi')], intent='unknown')
+  state = AgentState(messages=[], briefing_shown=True)
   assert route_after_initialiser(state) == 'intent_classifier'
+
+  state = AgentState(
+    messages=[AIMessage(content='Example', tool_calls=[{'name': 'tool', 'args': {}, 'id': '1'}])]
+  )
+  assert route_after_initialiser(state) == 'briefing_tools'
 
 def test_route_by_intent():
   task_read_state = AgentState(messages=[], intent='task_read')
