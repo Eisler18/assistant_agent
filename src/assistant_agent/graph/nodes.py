@@ -114,7 +114,9 @@ def session_initialiser_node(state: AgentState) -> dict:
     'Provide the user with a daily briefing of their tasks. '
     'Use the get_daily_briefing_data tool to retrieve structured task data, ' \
     'then format it into a concise message using the format_task_preview tool. '
-    'Also suggest new dates for overdue and unscheduled tasks to help the user plan their day'
+    'Also suggest new dates for overdue, unscheduled, and stale tasks to help the user plan '
+    'their day. Use relative terms like today, tomorrow, or this week for the suggestions. '
+    'If a task appears in both overdue and stale, mention it only under overdue.'
   )
 
   messages = [SystemMessage(content=system_prompt), *state['messages']]

@@ -82,6 +82,7 @@ class TestTaskReadNode:
       'build_overdue_filter',
       'parse_date_range',
       'build_unscheduled_filter',
+      'build_stale_filter',
       'get_task',
       'build_today_filter'
     }
