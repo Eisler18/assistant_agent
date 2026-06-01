@@ -28,6 +28,7 @@ from .assertions import (
 )
 from .seeder import ensure_seed, setup_repository
 from .trace import extract_tool_calls
+from .langsmith_client import get_run_metrics
 
 
 @dataclass(frozen=True)
@@ -187,7 +188,8 @@ def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> Scenar
   initial_count = len(repo.list())
   pre_interrupt_count = None
   thread_id = f'{scenario.id}-{run_idx}-{uuid4()}'
-  config = {"configurable": {"thread_id": thread_id}}
+  run_name = f"eval-{scenario.id}-{run_idx}-{uuid4().hex[:8]}"
+  config = {"configurable": {"thread_id": thread_id}, "run_name": run_name}
 
   try:
     if not scenario.turns or scenario.turns[0].user is None:
@@ -226,20 +228,22 @@ def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> Scenar
       )
       for assertion_cfg in scenario.assertions
     ]
+    langsmith_data = get_run_metrics(run_name)
     return ScenarioResult(
       scenario_id=scenario.id,
       run_index=run_idx,
       assertions=assertion_results,
       error=None,
-      langsmith_data=None
+      langsmith_data=langsmith_data
     )
   except Exception as exc:
+    langsmith_data = get_run_metrics(run_name)
     return ScenarioResult(
       scenario_id=scenario.id,
       run_index=run_idx,
       assertions=[],
       error=str(exc),
-      langsmith_data=None
+      langsmith_data=langsmith_data
     )
   finally:
     Task.set_repository(None)
@@ -256,7 +260,7 @@ def run_scenario(scenario: Scenario, runs: int) -> list[ScenarioResult]:
 
 
 def _load_scenarios(file_path: Path) -> list[Scenario]:
-  with open(file_path, 'r') as f:
+  with open(file_path, 'r', encoding='utf-8') as f:
     data = yaml.safe_load(f)
   return [load_scenario(scenario_dict, file_path) for scenario_dict in data.get('scenarios', [])]
 
