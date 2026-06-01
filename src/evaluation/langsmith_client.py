@@ -30,7 +30,7 @@ def get_run_metrics(run_name: str, project_name: str = 'assistant_agent') -> dic
         latency_ms = None
 
     return {
-      "run_id": getattr(run, "id", None),
+      "run_id": str(getattr(run, "id", None)),
       "total_tokens": getattr(run, "total_tokens", None),
       "prompt_tokens": getattr(run, "prompt_tokens", None),
       "completion_tokens": getattr(run, "completion_tokens", None),

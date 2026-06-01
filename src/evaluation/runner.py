@@ -4,6 +4,7 @@ import argparse
 import tempfile
 from typing import Any
 from uuid import uuid4
+import os
 
 import yaml
 from langchain_core.messages import HumanMessage
@@ -29,6 +30,7 @@ from .assertions import (
 from .seeder import ensure_seed, setup_repository
 from .trace import extract_tool_calls
 from .langsmith_client import get_run_metrics
+from .report import aggregate_results, write_json_report, print_terminal_summary
 
 
 @dataclass(frozen=True)
@@ -287,10 +289,15 @@ def main() -> int:
       print(f"- {scenario.id}: {scenario.description}")
     return 0
 
+  all_aggregated: list[dict] = []
   for scenario in scenarios:
-    run_scenario(scenario, args.runs or scenario.repetitions)
+    results = run_scenario(scenario, args.runs or scenario.repetitions)
+    aggregated = aggregate_results(scenario.id, scenario.description, results)
+    all_aggregated.append(aggregated)
 
-  print(f'Results pending. Output will be written to {args.output}.')
+  write_json_report(all_aggregated, args.output, repetitions=args.runs)
+  print_terminal_summary(all_aggregated)
+  print(f'Report written to {args.output}.')
   return 0
 
 
