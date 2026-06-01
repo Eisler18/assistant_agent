@@ -4,13 +4,13 @@ import json
 from typing import Any
 
 TASK_IDS = {
-  'overdue': '11111111-1111-1111-1111-111111111111',
-  'today_prep': '22222222-2222-2222-2222-222222222222',
-  'tomorrow_workout': '33333333-3333-3333-3333-333333333333',
-  'unscheduled_presentation': '44444444-4444-4444-4444-444444444444',
-  'upcoming_talk': '55555555-5555-5555-5555-555555555555',
-  'completed_review': '66666666-6666-6666-6666-666666666666',
-  'plain_pending': '77777777-7777-7777-7777-777777777777'
+  'overdue': '78bae885-a9a2-40f1-9081-a5047e9c9694',
+  'today_prep': '48938062-9c3c-405d-9389-70273d15eac5',
+  'tomorrow_workout': '17277980-fc5b-4335-8033-56c433e7f9b6',
+  'unscheduled_presentation': '61d8d1dc-4eda-46d3-bbe4-6cfa10fdbee9',
+  'upcoming_talk': '95f1db80-02b1-455e-b131-f090627eaa31',
+  'completed_review': '0983197f-bcaf-4843-af2e-e3363b283d31',
+  'plain_pending': 'd58c87f8-3826-40e8-9829-c61deee2b8cf'
 }
 
 def _iso(value: datetime | None) -> str | None:
