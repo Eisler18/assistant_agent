@@ -1,0 +1,50 @@
+scenarios:
+  - id: routes_to_create
+    description: "Routing to create intent"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Create a task called 'Routing Test Task'"
+    assertions:
+      - type: tools_called_include
+        tools: [create_task]
+      - type: tools_not_called
+        tools: [list_tasks, update_task, delete_task]
+
+  - id: routes_to_read
+    description: "Routing to read intent"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Show me all my pending tasks"
+    assertions:
+      - type: tools_called_include
+        tools: [list_tasks]
+      - type: tools_not_called
+        tools: [create_task, update_task, delete_task]
+
+  - id: routes_to_update
+    description: "Routing to update intent"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Mark the task titled 'Today's Meeting Prep' as completed"
+    assertions:
+      - type: tools_called_include
+        tools: [update_task]
+      - type: tools_not_called
+        tools: [create_task, delete_task]
+
+  - id: routes_to_unknown
+    description: "Routing to unknown intent"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "What's the weather like today?"
+    assertions:
+      - type: tools_not_called
+        tools: [create_task, list_tasks, update_task, delete_task]
