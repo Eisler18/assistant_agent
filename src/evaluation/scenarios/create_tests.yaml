@@ -1,0 +1,91 @@
+scenarios:
+  - id: create_task_title_only
+    description: "Create a task with title only"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Create a task called 'Thesis Abstract Draft'. The title is exactly 'Thesis Abstract Draft'. I only want to set the title for now"
+      - interrupt: "yes"
+    assertions:
+      - type: repository_task_exists
+        field: title
+        value: "Thesis Abstract Draft"
+      - type: tools_called_include
+        tools: [create_task]
+      - type: task_not_saved_before_interrupt
+      - type: repository_count_delta
+        delta: 1
+
+  - id: create_task_with_deadline
+    description: "Create a task with deadline expressed as next Friday"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Create a task called 'Write evaluation chapter' with a deadline next Friday. The title is exactly 'Write evaluation chapter'"
+      - interrupt: "yes"
+    assertions:
+      - type: repository_task_exists
+        field: title
+        value: "Write evaluation chapter"
+      - type: task_field_date_within
+        title: "Write evaluation chapter"
+        field: deadline
+        expression: "next Friday"
+        tolerance_hours: 24
+      - type: task_not_saved_before_interrupt
+      - type: repository_count_delta
+        delta: 1
+
+  - id: create_task_cancelled
+    description: "Create a task but cancel at interrupt"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Create a task called 'Cancelled Task'"
+      - interrupt: "no"
+    assertions:
+      - type: repository_task_absent
+        field: title
+        value: "Cancelled Task"
+      - type: repository_count_delta
+        delta: 0
+
+  - id: calendar_link_offered_after_create
+    description: "Offer calendar link after create"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Create a task called 'Calendar Link Test' planned for tomorrow at 10am with estimated time of 60 minutes. The title is exactly 'Calendar Link Test'"
+      - interrupt: "yes"
+    assertions:
+      - type: repository_task_exists
+        field: title
+        value: "Calendar Link Test"
+      - type: tools_called_include
+        tools: [generate_calendar_link]
+      - type: calendar_link_in_response
+
+  - id: date_parsing_specific
+    description: "Create a task with a specific date"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Create a task called 'Specific Date Task' with a deadline on June 30 2027. The title is 'Specific Date Task'."
+      - interrupt: "yes"
+    assertions:
+      - type: task_field_date_within
+        title: "Specific Date Task"
+        field: deadline
+        expression: "June 30 2027"
+        tolerance_hours: 24
+      - type: repository_task_exists
+        field: title
+        value: "Specific Date Task"
+
+  
+
