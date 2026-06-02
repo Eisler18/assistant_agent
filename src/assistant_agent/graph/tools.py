@@ -257,6 +257,8 @@ def parse_date_range(expression: str, end_expression: str | None = None) -> dict
 @tool
 def build_overdue_filter() -> dict:
   '''Return a filter dict for overdue tasks.
+  It does not need arguments as the definition of overdue is always the same:
+  deadline in the past and status pending.
 
   Returns: {'deadline_lte': <now_utc>, 'status': 'pending'}.
   Example: build_overdue_filter({})
@@ -266,6 +268,8 @@ def build_overdue_filter() -> dict:
 @tool
 def build_today_filter() -> dict:
   '''Return a filter dict for tasks planned for today.
+  It does not need arguments as the definition of "today" is always the same:
+  planned_at between today's start and end in UTC.
 
   Returns: {'planned_at_gte': <today_start_utc>, 'planned_at_lte': <today_end_utc>}.
   Example: build_today_filter({})
@@ -279,6 +283,8 @@ def build_today_filter() -> dict:
 @tool
 def build_unscheduled_filter() -> dict:
   '''Return a filter dict for unscheduled tasks.
+  It does not need arguments as the definition of unscheduled is always the same: 
+  has a deadline but no planned date.
 
   Returns: {'has_deadline': True, 'has_planned_at': False}.
   Example: build_unscheduled_filter({})
@@ -288,6 +294,8 @@ def build_unscheduled_filter() -> dict:
 @tool
 def build_stale_filter() -> dict:
   '''Return a filter dict for tasks with stale planned dates.
+  It does not need arguments as the definition of stale is always the same:
+  planned_at in the past and status pending.
 
   A task is stale when planned_at < now and status is pending.
 
@@ -301,6 +309,7 @@ def build_stale_filter() -> dict:
 @tool
 def get_daily_briefing_data() -> dict:
   '''Return a structured summary of overdue, today, upcoming, and unscheduled tasks.
+  It does not need arguments as it always returns the same categories based on the current date.
 
   Returns: dict with lists of task dicts.
   Example: get_daily_briefing_data({})

@@ -79,7 +79,7 @@ def generate_seed() -> dict[str, dict[str, Any]]:
       'description': 'Prepare talk outline',
       'status': 'pending',
       'deadline': _iso(now + timedelta(days=10)),
-      'planned_at': _iso(now + timedelta(days=5)),
+      'planned_at': _iso(now + timedelta(days=8)),
       'estimated_minutes': 90,
       'created_at': _iso(now - timedelta(days=4)),
       'updated_at': _iso(now - timedelta(days=2)),

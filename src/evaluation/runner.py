@@ -4,7 +4,6 @@ import argparse
 import tempfile
 from typing import Any
 from uuid import uuid4
-import os
 
 import yaml
 from langchain_core.messages import HumanMessage
@@ -25,7 +24,8 @@ from .assertions import (
   assert_task_not_saved_before_interrupt,
   assert_tool_call_order,
   assert_tools_called_include,
-  assert_tools_not_called
+  assert_tools_not_called,
+  assert_content_contains
 )
 from .seeder import ensure_seed, setup_repository
 from .trace import extract_tool_calls
@@ -179,6 +179,11 @@ def dispatch_assertion(
     messages = state.get('messages', [])
     return assert_calendar_link_in_response(messages)
 
+  if assertion_type == 'content_contains':
+    messages = state.get('messages', [])
+    expected_substring = _require(assertion_cfg, 'expected_substring', scenario_path)
+    return assert_content_contains(messages, expected_substring)
+
   raise ValueError(f'{scenario_path}: unknown assertion type {assertion_type!r}')
 
 
@@ -190,8 +195,8 @@ def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> Scenar
   initial_count = len(repo.list())
   pre_interrupt_count = None
   thread_id = f'{scenario.id}-{run_idx}-{uuid4()}'
-  run_name = f"eval-{scenario.id}-{run_idx}-{uuid4().hex[:8]}"
-  config = {"configurable": {"thread_id": thread_id}, "run_name": run_name}
+  run_name = f'eval-{scenario.id}-{run_idx}-{uuid4().hex[:8]}'
+  config = { 'configurable': { 'thread_id': thread_id }, 'run_name': run_name }
 
   try:
     if not scenario.turns or scenario.turns[0].user is None:

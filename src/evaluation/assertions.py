@@ -151,3 +151,10 @@ def assert_calendar_link_in_response(messages: list) -> AssertionResult:
   passed = 'calendar.google.com' in content
   detail = '' if passed else 'No calendar.google.com link found.'
   return AssertionResult(name, passed, detail)
+
+def assert_content_contains(messages: list, expected_substring: str) -> AssertionResult:
+  name = 'content_contains'
+  content = get_last_ai_message_content(messages)
+  passed = expected_substring.lower() in content.lower()
+  detail = '' if passed else f'Expected substring {expected_substring!r} not found.'
+  return AssertionResult(name, passed, detail)
