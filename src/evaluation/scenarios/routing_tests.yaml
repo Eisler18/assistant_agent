@@ -5,12 +5,13 @@ scenarios:
     initial_state:
       briefing_shown: true
     turns:
-      - user: "Create a task called 'Routing Test Task'"
+      - user: "Create a task called 'Routing Test Task'. I only want to set the title for now"
     assertions:
       - type: tools_called_include
         tools: [create_task]
       - type: tools_not_called
         tools: [list_tasks, update_task, delete_task]
+      - type: interrupt_fired
 
   - id: routes_to_read
     description: "Routing to read intent"
@@ -31,12 +32,13 @@ scenarios:
     initial_state:
       briefing_shown: true
     turns:
-      - user: "Mark the task titled 'Today's Meeting Prep' as completed"
+      - user: "Mark the task titled 'Today's Meeting Prep' for today as completed"
     assertions:
       - type: tools_called_include
         tools: [update_task]
       - type: tools_not_called
         tools: [create_task, delete_task]
+      - type: interrupt_fired
 
   - id: routes_to_unknown
     description: "Routing to unknown intent"

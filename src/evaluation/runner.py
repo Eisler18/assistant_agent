@@ -109,7 +109,7 @@ def load_scenario(scenario_dict: dict[str, Any], path: Path) -> Scenario:
 def _get_task_title(cfg: dict[str, Any], path: Path) -> str:
   task_title = cfg.get('title') or cfg.get('task_title')
   if not task_title:
-    raise ValueError(f"{path}: assertion missing task title")
+    raise ValueError(f'{path}: assertion missing task title')
   return task_title
 
 
@@ -214,7 +214,7 @@ def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> Scenar
         result = graph.invoke(Command(resume=turn.interrupt), config=config, version='v2')
       elif turn.user:
         result = graph.invoke(
-          {"messages": [HumanMessage(content=turn.user)]},
+          { 'messages': [HumanMessage(content=turn.user)] },
           config=config,
           version='v2'
         )
@@ -291,7 +291,7 @@ def main() -> int:
   if args.dry_run:
     print(f'Loaded {len(scenarios)} scenarios:')
     for scenario in scenarios:
-      print(f"- {scenario.id}: {scenario.description}")
+      print(f'- {scenario.id}: {scenario.description}')
     return 0
 
   all_aggregated: list[dict] = []
