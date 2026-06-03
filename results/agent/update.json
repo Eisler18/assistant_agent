@@ -1,0 +1,934 @@
+{
+  "generated_at": "2026-06-03T20:53:41.941363+00:00",
+  "model": "openai/gpt-oss-20b",
+  "repetitions": 5,
+  "scenarios": [
+    {
+      "id": "update_task_status_completed",
+      "description": "Mark Today's Meeting Prep as completed",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": false,
+              "detail": "Expected status='completed', got 'pending'."
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": false,
+              "detail": "Interrupt turn was not reached."
+            },
+            {
+              "name": "tools_called_include",
+              "passed": false,
+              "detail": "Missing tools: update_task."
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f34-9cce-78b1-b9ed-33dd2ea925ea",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f35-39b1-7fc3-a7a2-42210173b32f",
+            "total_tokens": 6169,
+            "prompt_tokens": 5836,
+            "completion_tokens": 333,
+            "latency_ms": 9123.875
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": false,
+              "detail": "Expected status='completed', got 'pending'."
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": false,
+              "detail": "Interrupt turn was not reached."
+            },
+            {
+              "name": "tools_called_include",
+              "passed": false,
+              "detail": "Missing tools: update_task."
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f35-6716-7423-ab44-db6eafca7ab2",
+            "total_tokens": 1785,
+            "prompt_tokens": 1613,
+            "completion_tokens": 172,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f36-3442-7f33-a1de-59a96dfa00e2",
+            "total_tokens": 9708,
+            "prompt_tokens": 9062,
+            "completion_tokens": 646,
+            "latency_ms": 16994.475000000002
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f36-b970-78b0-9240-5383ee3ee8b0",
+            "total_tokens": 9688,
+            "prompt_tokens": 9062,
+            "completion_tokens": 626,
+            "latency_ms": 16518.959
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "task_field_equals:status",
+          "passed": 3,
+          "failed": 2,
+          "pass_rate": 0.6
+        },
+        {
+          "name": "task_not_saved_before_interrupt",
+          "passed": 3,
+          "failed": 2,
+          "pass_rate": 0.6
+        },
+        {
+          "name": "tools_called_include",
+          "passed": 3,
+          "failed": 2,
+          "pass_rate": 0.6
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 5470,
+        "std_tokens": 4464.8878485355035,
+        "p50_latency_ms": 16518.959,
+        "p95_latency_ms": 16994.475000000002
+      }
+    },
+    {
+      "id": "update_task_planned_at",
+      "description": "Reschedule Unscheduled Presentation to tomorrow",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:planned_at",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f37-90ae-71e2-b502-9b2992db4493",
+            "total_tokens": 10164,
+            "prompt_tokens": 9455,
+            "completion_tokens": 709,
+            "latency_ms": 18459.415
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:planned_at",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f38-6612-7990-a480-f9bf563b41fe",
+            "total_tokens": 10005,
+            "prompt_tokens": 9446,
+            "completion_tokens": 559,
+            "latency_ms": 14600.068000000001
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:planned_at",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f39-1a4c-78a3-b471-e1dbdf48dc11",
+            "total_tokens": 9883,
+            "prompt_tokens": 9341,
+            "completion_tokens": 542,
+            "latency_ms": 14064.42
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:planned_at",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f39-e8a9-7023-86e2-387669f2ab0a",
+            "total_tokens": 10110,
+            "prompt_tokens": 9455,
+            "completion_tokens": 655,
+            "latency_ms": 16780.101
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:planned_at",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3a-a7e1-7cd0-89c3-b1ea80eb472d",
+            "total_tokens": 6482,
+            "prompt_tokens": 6158,
+            "completion_tokens": 324,
+            "latency_ms": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "task_field_date_within:planned_at",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "task_not_saved_before_interrupt",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 9328.8,
+        "std_tokens": 1595.0303131915707,
+        "p50_latency_ms": 15690.0845,
+        "p95_latency_ms": 18459.415
+      }
+    },
+    {
+      "id": "update_task_cancelled",
+      "description": "Attempt to change title but cancel",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3b-23d6-7b60-ad4f-6a71f29299e4",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 7.158
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3b-b2a5-7610-9da0-3cf109beba24",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 9.001999999999999
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3b-bd6e-7222-9e7a-a0ea447adc8f",
+            "total_tokens": 1938,
+            "prompt_tokens": 1617,
+            "completion_tokens": 321,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3b-fbfe-7b80-8404-7f48dc581b11",
+            "total_tokens": 1818,
+            "prompt_tokens": 1617,
+            "completion_tokens": 201,
+            "latency_ms": 5280.865000000001
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3c-6baf-7f10-a2c0-b4921638cb8e",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 6.856
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "task_field_equals:title",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "repository_count_delta",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 751.2,
+        "std_tokens": 1029.4975473501624,
+        "p50_latency_ms": 8.08,
+        "p95_latency_ms": 5280.865000000001
+      }
+    },
+    {
+      "id": "delete_task_confirmed",
+      "description": "Delete Plain Pending Task with confirmation",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3c-96bf-7cb0-a02c-a31282e99a1d",
+            "total_tokens": 2849,
+            "prompt_tokens": 2809,
+            "completion_tokens": 40,
+            "latency_ms": 1772.7379999999998
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3c-c0ff-7bf1-9ff7-06440472132a",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3c-faea-7453-a3ea-fd1e29e9d5aa",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3d-25ce-70b3-9478-0d53d4d88d73",
+            "total_tokens": 2821,
+            "prompt_tokens": 2771,
+            "completion_tokens": 50,
+            "latency_ms": 1434.807
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": false,
+              "detail": "Interrupt turn was not reached."
+            },
+            {
+              "name": "tools_called_include",
+              "passed": false,
+              "detail": "Missing tools: delete_task."
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": false,
+              "detail": "Expected count 6, got 7."
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3d-3530-7702-baec-e565147effa1",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "task_not_saved_before_interrupt",
+          "passed": 4,
+          "failed": 1,
+          "pass_rate": 0.8
+        },
+        {
+          "name": "tools_called_include",
+          "passed": 4,
+          "failed": 1,
+          "pass_rate": 0.8
+        },
+        {
+          "name": "repository_count_delta",
+          "passed": 4,
+          "failed": 1,
+          "pass_rate": 0.8
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 1134,
+        "std_tokens": 1552.8250062386296,
+        "p50_latency_ms": 1603.7725,
+        "p95_latency_ms": 1772.7379999999998
+      }
+    },
+    {
+      "id": "delete_task_cancelled",
+      "description": "Attempt delete but cancel",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3d-aa06-74e1-a6ed-8a2b4e3097e6",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 9.431999999999999
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3d-d7db-71f2-a7fc-dc027038b18e",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 7.842999999999999
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3d-e2a1-7cd0-b097-3079e42d96b1",
+            "total_tokens": 1792,
+            "prompt_tokens": 1609,
+            "completion_tokens": 183,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3e-6b1d-7ab0-8801-bfd328eacbf7",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 9.768
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_equals:status",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3e-75d9-75f3-9b2e-1fad8899df96",
+            "total_tokens": 1985,
+            "prompt_tokens": 1609,
+            "completion_tokens": 376,
+            "latency_ms": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "task_field_equals:status",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "repository_count_delta",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 755.4,
+        "std_tokens": 1036.6223034451843,
+        "p50_latency_ms": 9.431999999999999,
+        "p95_latency_ms": 9.768
+      }
+    },
+    {
+      "id": "calendar_link_offered_after_update",
+      "description": "Offer calendar link after update",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f3f-4ac4-73b2-88b7-3e6a5042dd06",
+            "total_tokens": 9650,
+            "prompt_tokens": 8936,
+            "completion_tokens": 714,
+            "latency_ms": 18919.646
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f40-2ba4-7462-b247-d6256188381e",
+            "total_tokens": 10281,
+            "prompt_tokens": 9380,
+            "completion_tokens": 901,
+            "latency_ms": 23516.4
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f40-e4bc-7451-88e2-5d0120b8782f",
+            "total_tokens": 6660,
+            "prompt_tokens": 6183,
+            "completion_tokens": 477,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f41-a18c-7200-a65b-31a699b7ecfe",
+            "total_tokens": 9867,
+            "prompt_tokens": 9244,
+            "completion_tokens": 623,
+            "latency_ms": 16555.245
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f42-c924-7300-af35-765866c097cd",
+            "total_tokens": 10894,
+            "prompt_tokens": 9371,
+            "completion_tokens": 1523,
+            "latency_ms": 40182.556
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tools_called_include",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "calendar_link_in_response",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 9470.4,
+        "std_tokens": 1641.006185241238,
+        "p50_latency_ms": 21218.023,
+        "p95_latency_ms": 40182.556
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 6,
+    "fully_passing": 4,
+    "partial": 2,
+    "errored": 0,
+    "overall_assertion_pass_rate": 0.9
+  }
+}

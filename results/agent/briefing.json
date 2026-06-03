@@ -1,0 +1,300 @@
+{
+  "generated_at": "2026-06-03T19:42:17.363012+00:00",
+  "model": "openai/gpt-oss-20b",
+  "repetitions": 5,
+  "scenarios": [
+    {
+      "id": "briefing_runs_at_session_start",
+      "description": "Briefing runs if not already shown",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8efe-cf30-72f0-946d-2fb5c6fcc31e",
+            "total_tokens": 5015,
+            "prompt_tokens": 4081,
+            "completion_tokens": 934,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8eff-42b4-7503-be91-b859dd99a8ea",
+            "total_tokens": 4749,
+            "prompt_tokens": 4085,
+            "completion_tokens": 664,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": false,
+              "detail": "Missing tools in trace. before='get_daily_briefing_data', after='format_task_preview'."
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8eff-a26c-74d0-bf14-047fbb502fba",
+            "total_tokens": 4355,
+            "prompt_tokens": 4081,
+            "completion_tokens": 274,
+            "latency_ms": 7225.478
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": false,
+              "detail": "Missing tools in trace. before='get_daily_briefing_data', after='format_task_preview'."
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8eff-c948-71c1-aeac-7a9ebbb0c80a",
+            "total_tokens": 1894,
+            "prompt_tokens": 1604,
+            "completion_tokens": 290,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": false,
+              "detail": "Missing tools in trace. before='get_daily_briefing_data', after='format_task_preview'."
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8eff-fa93-7cb3-9589-8b8d2e18aa80",
+            "total_tokens": 1729,
+            "prompt_tokens": 1604,
+            "completion_tokens": 125,
+            "latency_ms": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tools_called_include",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "tool_call_order",
+          "passed": 2,
+          "failed": 3,
+          "pass_rate": 0.4
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 3548.4,
+        "std_tokens": 1603.9182647504206,
+        "p50_latency_ms": 7225.478,
+        "p95_latency_ms": 7225.478
+      }
+    },
+    {
+      "id": "briefing_skipped_if_already_shown",
+      "description": "Briefing skipped when briefing_shown true",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": false,
+              "detail": "Unexpected tools called: get_daily_briefing_data."
+            },
+            {
+              "name": "tools_called_include",
+              "passed": false,
+              "detail": "Missing tools: list_tasks."
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f00-303e-7d10-b9a5-3093214f009a",
+            "total_tokens": 7584,
+            "prompt_tokens": 6816,
+            "completion_tokens": 768,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f00-a2ab-7f71-a9a6-6b13c20b563b",
+            "total_tokens": 8263,
+            "prompt_tokens": 7464,
+            "completion_tokens": 799,
+            "latency_ms": 21428.706
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f01-043f-7e11-8215-290ac50ac732",
+            "total_tokens": 7977,
+            "prompt_tokens": 7464,
+            "completion_tokens": 513,
+            "latency_ms": 14342.288
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f01-4768-77b3-8c1a-eac59018c298",
+            "total_tokens": 8297,
+            "prompt_tokens": 7464,
+            "completion_tokens": 833,
+            "latency_ms": 28571.370000000003
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f01-c0c2-7351-a456-5a0f001976c1",
+            "total_tokens": 8116,
+            "prompt_tokens": 7473,
+            "completion_tokens": 643,
+            "latency_ms": 16966.863
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tools_not_called",
+          "passed": 4,
+          "failed": 1,
+          "pass_rate": 0.8
+        },
+        {
+          "name": "tools_called_include",
+          "passed": 4,
+          "failed": 1,
+          "pass_rate": 0.8
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 8047.4,
+        "std_tokens": 288.6109838519664,
+        "p50_latency_ms": 19197.7845,
+        "p95_latency_ms": 28571.370000000003
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 2,
+    "fully_passing": 0,
+    "partial": 2,
+    "errored": 0,
+    "overall_assertion_pass_rate": 0.75
+  }
+}

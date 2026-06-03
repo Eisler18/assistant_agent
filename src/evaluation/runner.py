@@ -9,6 +9,7 @@ import yaml
 from langchain_core.messages import HumanMessage
 from langgraph.types import Command
 
+from assistant_agent.graph.react_agent import react_agent
 from assistant_agent.graph.graph import graph
 from assistant_agent.models.task import Task
 
@@ -187,7 +188,12 @@ def dispatch_assertion(
   raise ValueError(f'{scenario_path}: unknown assertion type {assertion_type!r}')
 
 
-def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> ScenarioResult:
+def run_scenario_once(
+  graph_type: str,
+  scenario: Scenario,
+  tmp_dir: Path,
+  run_idx: int
+) -> ScenarioResult:
   # pylint: disable=too-many-locals,broad-exception-caught
   ensure_seed(scenario.seed)
   repo = setup_repository(scenario.seed, tmp_dir)
@@ -197,6 +203,12 @@ def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> Scenar
   thread_id = f'{scenario.id}-{run_idx}-{uuid4()}'
   run_name = f'eval-{scenario.id}-{run_idx}-{uuid4().hex[:8]}'
   config = { 'configurable': { 'thread_id': thread_id }, 'run_name': run_name }
+  if graph_type == 'graph':
+    system = graph
+  elif graph_type == 'agent':
+    system = react_agent
+  else:
+    raise ValueError(f'Unknown graph type: {graph_type!r}')
 
   try:
     if not scenario.turns or scenario.turns[0].user is None:
@@ -206,14 +218,14 @@ def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> Scenar
       **scenario.initial_state,
       'messages': [HumanMessage(content=scenario.turns[0].user)]
     }
-    result = graph.invoke(initial_state, config=config, version='v2')
+    result = system.invoke(initial_state, config=config, version='v2')
 
     for turn in scenario.turns[1:]:
       if turn.interrupt is not None and result.interrupts:
         pre_interrupt_count = len(repo.list())
-        result = graph.invoke(Command(resume=turn.interrupt), config=config, version='v2')
+        result = system.invoke(Command(resume=turn.interrupt), config=config, version='v2')
       elif turn.user:
-        result = graph.invoke(
+        result = system.invoke(
           { 'messages': [HumanMessage(content=turn.user)] },
           config=config,
           version='v2'
@@ -256,12 +268,12 @@ def run_scenario_once(scenario: Scenario, tmp_dir: Path, run_idx: int) -> Scenar
     Task.set_repository(None)
 
 
-def run_scenario(scenario: Scenario, runs: int) -> list[ScenarioResult]:
+def run_scenario(graph_type: str, scenario: Scenario, runs: int) -> list[ScenarioResult]:
   results: list[ScenarioResult] = []
   for run_idx in range(runs):
     print(f'[{scenario.id}] run {run_idx + 1}/{runs}')
     with tempfile.TemporaryDirectory() as tmp_dir:
-      result = run_scenario_once(scenario, Path(tmp_dir), run_idx)
+      result = run_scenario_once(graph_type, scenario, Path(tmp_dir), run_idx)
       results.append(result)
   return results
 
@@ -279,6 +291,7 @@ def main() -> int:
   parser.add_argument('--runs', type=int, default=5)
   parser.add_argument('--output', type=Path, default=Path('results/report.json'))
   parser.add_argument('--dry-run', action='store_true')
+  parser.add_argument('--graph-type', type=str, default='graph')
   args = parser.parse_args()
 
   scenarios_path = Path.cwd() / 'src' / 'evaluation' / 'scenarios' / args.scenarios
@@ -296,7 +309,7 @@ def main() -> int:
 
   all_aggregated: list[dict] = []
   for scenario in scenarios:
-    results = run_scenario(scenario, args.runs or scenario.repetitions)
+    results = run_scenario(args.graph_type, scenario, args.runs or scenario.repetitions)
     aggregated = aggregate_results(scenario.id, scenario.description, results)
     all_aggregated.append(aggregated)
 
