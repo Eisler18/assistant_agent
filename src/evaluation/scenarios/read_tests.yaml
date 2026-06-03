@@ -1,0 +1,72 @@
+scenarios:
+  - id: read_tasks_today
+    description: "List tasks planned for today"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "List all my tasks planned for today"
+    assertions:
+      - type: tools_called_include
+        tools: [build_today_filter, list_tasks, format_task_preview]
+      - type: tools_not_called
+        tools: [create_task, update_task, delete_task]
+      - type: tool_call_order
+        before: build_today_filter
+        after: list_tasks
+      - type: content_contains
+        expected_substring: "Today's Meeting Prep"
+
+  - id: read_tasks_overdue
+    description: "List overdue pending tasks"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Show me all overdue tasks"
+    assertions:
+      - type: tools_called_include
+        tools: [build_overdue_filter, list_tasks, format_task_preview]
+      - type: tools_not_called
+        tools: [create_task, update_task, delete_task]
+      - type: tool_call_order
+        before: build_overdue_filter
+        after: list_tasks
+      - type: content_contains
+        expected_substring: "Overdue Report"
+
+  - id: read_tasks_date_range
+    description: "List pending tasks for next week"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "What pending tasks do I have scheduled for next week?"
+    assertions:
+      - type: tools_called_include
+        tools: [parse_date_range, list_tasks, format_task_preview]
+      - type: tools_not_called
+        tools: [create_task, update_task, delete_task]
+      - type: tool_call_order
+        before: parse_date_range
+        after: list_tasks
+      - type: content_contains
+        expected_substring: "Upcoming Conference Talk"
+
+  - id: read_unscheduled_tasks
+    description: "List tasks that have deadline but no planned date"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Which of my tasks have a deadline set but no planned date?"
+    assertions:
+      - type: tools_called_include
+        tools: [build_unscheduled_filter, list_tasks, format_task_preview]
+      - type: tools_not_called
+        tools: [create_task, update_task, delete_task]
+      - type: tool_call_order
+        before: build_unscheduled_filter
+        after: list_tasks
+      - type: content_contains
+        expected_substring: "Unscheduled Presentation"

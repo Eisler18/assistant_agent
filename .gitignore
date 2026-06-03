@@ -32,6 +32,7 @@ venv/
 
 # Data files
 data/*.json
+src/evaluation/**/*.json
 
 # mypy
 .mypy_cache/
@@ -41,7 +42,3 @@ data/*.json
 
 # Visual Studio Code
 .vscode/
-
-# Cursor
-.cursorignore
-.cursorindexingignore

@@ -1,0 +1,25 @@
+scenarios: 
+  - id: briefing_runs_at_session_start
+    description: "Briefing runs if not already shown"
+    seed: fixtures/seed.json
+    turns:
+      - user: "Hello"
+    assertions:
+      - type: tools_called_include
+        tools: [get_daily_briefing_data]
+      - type: tool_call_order
+        before: get_daily_briefing_data
+        after: format_task_preview
+
+  - id: briefing_skipped_if_already_shown
+    description: "Briefing skipped when briefing_shown true"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "What are my tasks for today?"
+    assertions:
+      - type: tools_not_called
+        tools: [get_daily_briefing_data]
+      - type: tools_called_include
+        tools: [list_tasks]

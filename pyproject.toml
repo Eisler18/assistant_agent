@@ -56,7 +56,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=src/assistant_agent --cov-report=xml --cov-report=html --cov-report=term-missing"
+addopts = "--cov=src --cov-report=xml --cov-report=html --cov-report=term-missing"
 env = ["LANGCHAIN_TRACING_V2=false"]
 filterwarnings = [
     "ignore:The default value of `allowed_objects` will change in a future version.*:langchain_core._api.deprecation.LangChainPendingDeprecationWarning",
