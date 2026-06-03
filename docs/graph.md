@@ -72,7 +72,7 @@ flowchart TD
 | Briefing | `get_daily_briefing_data` | Return `{overdue,today,upcoming,unscheduled,stale}` arrays of task dicts |
 | Calendar links | `generate_calendar_link` | Build a Google Calendar link from task details |
 
-## Tool Allocation
+### Tool Allocation
 
 | Node | Tool set |
 | --- | --- |
@@ -89,6 +89,10 @@ flowchart TD
 - `should_continue` inspects the last message and routes to the tool node if tool calls are
   present; write tools (`create_task`, `update_task`, `delete_task`) route to the interrupt
 - `should_save_task` decides whether to proceed with the write tools after confirmation
+
+## Session Initialiser
+
+The `session_initialiser` node runs at session start, emits a single briefing message, and sets `briefing_shown=True` in state. The daily briefing returns five sections: `overdue`, `today`, `upcoming`, `unscheduled`, and `stale`. The next user message triggers intent classification in a new invocation
 
 ## MemorySaver Checkpointing
 
@@ -143,7 +147,3 @@ Tests disable tracing to keep the suite isolated and deterministic. Traces are o
 recorded for real runs launched from scripts or a REPL
 
 Trace example: https://eu.smith.langchain.com/public/b80c96ad-810a-432a-a5fc-67193223ab40/r
-
-## Session Initialiser
-
-The `session_initialiser` node runs at session start, emits a single briefing message, and sets `briefing_shown=True` in state. The daily briefing returns five sections: `overdue`, `today`, `upcoming`, `unscheduled`, and `stale`. The next user message triggers intent classification in a new invocation
