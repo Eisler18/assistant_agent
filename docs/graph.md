@@ -51,8 +51,8 @@ flowchart TD
 | --- | --- | --- | --- | --- |
 | `messages` | `list` (reducer: `add_messages`) | `[]` | All nodes | Full conversation history; reducer merges by message id |
 | `intent` | `Literal['task_create', 'task_read', 'task_update', 'unknown']` | `unknown` | Intent classifier | Drives the routing decision after classification |
-| `confirmation` | `bool | None` | `None` | Interrupt node | Set when the user confirms a write action |
-| `cancelled` | `bool | None` | `None` | Interrupt node | Set when the user cancels a write action |
+| `confirmation` | `bool` | `None` | `None` | Interrupt node | Set when the user confirms a write action |
+| `cancelled` | `bool` | `None` | `None` | Interrupt node | Set when the user cancels a write action |
 | `briefing_shown` | `bool` | `False` | Session initialiser | Prevents re-emitting the daily briefing in the same session |
 
 ## Tools
