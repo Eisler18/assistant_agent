@@ -31,9 +31,10 @@ _WRITE_TOOLS = { 'create_task', 'update_task', 'delete_task' }
 
 SYSTEM_PROMPT = '''You are a personal time management assistant.
 You help users manage tasks: create, read, update, and delete them.
-You also provide a daily briefing at the start of each session.
+{}
 
 Rules:
+- Only provide the daily briefing when the session starts.
 - Always use tools for date parsing; never parse dates yourself.
 - Always use a filter builder before calling list_tasks.
 - Show task details using format_task_preview.
@@ -41,14 +42,21 @@ Rules:
 '''
 
 def react_agent_node(state: AgentState) -> dict:
-  messages = [SystemMessage(content=SYSTEM_PROMPT), *state['messages']]
+  if state.get('briefing_shown', False):
+    system_prompt = SYSTEM_PROMPT.format('The daily briefing has already been shown.')
+  else:
+    system_prompt = SYSTEM_PROMPT.format('Provide a daily briefing at the start of each session.')
+
+  messages = [SystemMessage(content=system_prompt), *state['messages']]
   llm_with_tools = config.llm.bind_tools(ALL_TOOLS)
   response = llm_with_tools.invoke(messages)
   sanitized = _sanitize_tool_calls(response)
+
   return {
     'messages': [sanitized],
     'confirmation': None,
-    'cancelled': None
+    'cancelled': None,
+    'briefing_shown': True
   }
 
 def should_continue(state: AgentState) -> str:
