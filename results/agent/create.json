@@ -1,0 +1,884 @@
+{
+  "generated_at": "2026-06-03T20:35:28.131583+00:00",
+  "model": "openai/gpt-oss-20b",
+  "repetitions": 5,
+  "scenarios": [
+    {
+      "id": "create_task_title_only",
+      "description": "Create a task with title only",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2b-6184-7b70-8a17-dac856b7b6ff",
+            "total_tokens": 3912,
+            "prompt_tokens": 3662,
+            "completion_tokens": 250,
+            "latency_ms": 6635.9490000000005
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2b-9bec-7f32-932a-48e000dcf73d",
+            "total_tokens": 1864,
+            "prompt_tokens": 1785,
+            "completion_tokens": 79,
+            "latency_ms": 2145.348
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2b-b5df-70f2-8cf8-883c1bf4dc49",
+            "total_tokens": 3876,
+            "prompt_tokens": 3684,
+            "completion_tokens": 192,
+            "latency_ms": 5719.712
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2b-e19b-7830-a837-f9ff53258f83",
+            "total_tokens": 3966,
+            "prompt_tokens": 3739,
+            "completion_tokens": 227,
+            "latency_ms": 6271.566
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2c-15dd-7013-bc83-ce922c50718f",
+            "total_tokens": 4070,
+            "prompt_tokens": 3733,
+            "completion_tokens": 337,
+            "latency_ms": 8695.501999999999
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "repository_task_exists:title",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "tools_called_include",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "task_not_saved_before_interrupt",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "repository_count_delta",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 3537.6,
+        "std_tokens": 938.4299654209684,
+        "p50_latency_ms": 6271.566,
+        "p95_latency_ms": 8695.501999999999
+      }
+    },
+    {
+      "id": "create_task_with_deadline",
+      "description": "Create a task with deadline expressed as next Friday",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2c-6324-7881-8353-00fbcf4d83fc",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2c-8f04-7fc0-a14f-a320f4564f51",
+            "total_tokens": 1904,
+            "prompt_tokens": 1794,
+            "completion_tokens": 110,
+            "latency_ms": 3174.985
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2c-fde1-7571-a15f-9f81a386247a",
+            "total_tokens": 4396,
+            "prompt_tokens": 4020,
+            "completion_tokens": 376,
+            "latency_ms": 9630.231
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2d-5f06-7330-bf09-9a3db8b53000",
+            "total_tokens": 4399,
+            "prompt_tokens": 4020,
+            "completion_tokens": 379,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "task_not_saved_before_interrupt",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2d-d004-7972-a804-30529ae2963d",
+            "total_tokens": 2179,
+            "prompt_tokens": 1905,
+            "completion_tokens": 274,
+            "latency_ms": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "repository_task_exists:title",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "task_field_date_within:deadline",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "task_not_saved_before_interrupt",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "repository_count_delta",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 2575.6,
+        "std_tokens": 1862.8403850035031,
+        "p50_latency_ms": 6402.608,
+        "p95_latency_ms": 9630.231
+      }
+    },
+    {
+      "id": "create_task_cancelled",
+      "description": "Create a task but cancel at interrupt",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_absent:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2e-1220-7a82-8567-93c66aa186eb",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 11.549
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_absent:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2e-28da-7fc1-83f2-fd8b773314bf",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 11.553
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_absent:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2e-488a-7531-bcd0-6d6d357191f1",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 13.001000000000001
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_absent:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2e-62de-71b1-9978-7b29698dcfcb",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": 5.9430000000000005
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_absent:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_count_delta",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2e-6e3e-7e52-99d6-603804879b22",
+            "total_tokens": 1727,
+            "prompt_tokens": 1608,
+            "completion_tokens": 119,
+            "latency_ms": 3286.808
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "repository_task_absent:title",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "repository_count_delta",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 345.4,
+        "std_tokens": 772.3378794284274,
+        "p50_latency_ms": 11.553,
+        "p95_latency_ms": 3286.808
+      }
+    },
+    {
+      "id": "calendar_link_offered_after_create",
+      "description": "Offer calendar link after create",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2e-caaf-7ca2-9baf-83bc42dc915f",
+            "total_tokens": 4518,
+            "prompt_tokens": 4084,
+            "completion_tokens": 434,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2f-6247-7260-b16b-52cd1d1b0b3e",
+            "total_tokens": 4234,
+            "prompt_tokens": 3957,
+            "completion_tokens": 277,
+            "latency_ms": 7174.202
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f2f-ca64-7391-b6e8-c2d32ee9f8ba",
+            "total_tokens": 4512,
+            "prompt_tokens": 3948,
+            "completion_tokens": 564,
+            "latency_ms": 14666.955
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f30-5548-73b1-b881-56ecc9665568",
+            "total_tokens": 4543,
+            "prompt_tokens": 4081,
+            "completion_tokens": 462,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "calendar_link_in_response",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f30-f3db-7831-a630-afa47bac06d0",
+            "total_tokens": 7155,
+            "prompt_tokens": 6200,
+            "completion_tokens": 955,
+            "latency_ms": 24674.629
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "repository_task_exists:title",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "tools_called_include",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "calendar_link_in_response",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 4992.4,
+        "std_tokens": 1215.504956797791,
+        "p50_latency_ms": 14666.955,
+        "p95_latency_ms": 24674.629
+      }
+    },
+    {
+      "id": "date_parsing_specific",
+      "description": "Create a task with a specific date",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f31-6b69-73b2-aeb8-b87203b55408",
+            "total_tokens": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f31-a9d6-73b0-9d16-085e3ee5dbc8",
+            "total_tokens": 2045,
+            "prompt_tokens": 1822,
+            "completion_tokens": 223,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f31-eeb2-75c3-aad5-6ebb3b242b3e",
+            "total_tokens": 4243,
+            "prompt_tokens": 3807,
+            "completion_tokens": 436,
+            "latency_ms": 11071.473
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f32-3c48-7840-9afb-10bd0bae3222",
+            "total_tokens": 4221,
+            "prompt_tokens": 3832,
+            "completion_tokens": 389,
+            "latency_ms": 10217.533
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "task_field_date_within:deadline",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "repository_task_exists:title",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e8f32-7697-7fa0-9f31-1de06baab9ea",
+            "total_tokens": 6416,
+            "prompt_tokens": 5799,
+            "completion_tokens": 617,
+            "latency_ms": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "task_field_date_within:deadline",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "repository_task_exists:title",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 3385,
+        "std_tokens": 2443.1458204536216,
+        "p50_latency_ms": 10644.503,
+        "p95_latency_ms": 11071.473
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 5,
+    "fully_passing": 5,
+    "partial": 0,
+    "errored": 0,
+    "overall_assertion_pass_rate": 1.0
+  }
+}
