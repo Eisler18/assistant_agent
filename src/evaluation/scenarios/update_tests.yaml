@@ -1,0 +1,93 @@
+scenarios:
+  - id: update_task_status_completed
+    description: "Mark Today's Meeting Prep as completed"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Mark the task titled 'Today's Meeting Prep' for today as completed"
+      - interrupt: "yes"
+    assertions:
+      - type: task_field_equals
+        title: "Today's Meeting Prep"
+        field: status
+        value: completed
+      - type: task_not_saved_before_interrupt
+      - type: tools_called_include
+        tools: [update_task]
+
+  - id: update_task_planned_at
+    description: "Reschedule Unscheduled Presentation to tomorrow"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Reschedule the task titled 'Unscheduled Presentation' to tomorrow"
+      - interrupt: "yes"
+    assertions:
+      - type: task_field_date_within
+        title: "Unscheduled Presentation"
+        field: planned_at
+        expression: "tomorrow"
+        tolerance_hours: 24
+      - type: task_not_saved_before_interrupt
+
+  - id: update_task_cancelled
+    description: "Attempt to change title but cancel"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Change the title of the task 'Plain Pending Task' to 'Renamed Task'"
+      - interrupt: "no"
+    assertions:
+      - type: task_field_equals
+        title: "Plain Pending Task"
+        field: title
+        value: "Plain Pending Task"
+      - type: repository_count_delta
+        delta: 0
+
+  - id: delete_task_confirmed
+    description: "Delete Plain Pending Task with confirmation"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Delete the task titled 'Plain Pending Task'"
+      - interrupt: "yes"
+    assertions:
+      - type: task_not_saved_before_interrupt
+      - type: tools_called_include
+        tools: [delete_task]
+      - type: repository_count_delta
+        delta: -1
+
+  - id: delete_task_cancelled
+    description: "Attempt delete but cancel"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Delete the task titled 'Plain Pending Task'"
+      - interrupt: "no"
+    assertions:
+      - type: task_field_equals
+        title: "Plain Pending Task"
+        field: status
+        value: pending
+      - type: repository_count_delta
+        delta: 0
+
+  - id: calendar_link_offered_after_update
+    description: "Offer calendar link after update"
+    seed: fixtures/seed.json
+    initial_state:
+      briefing_shown: true
+    turns:
+      - user: "Update the task titled 'Today's Meeting Prep' for today to tomorrow at 2pm"
+      - interrupt: "yes"
+    assertions:
+      - type: tools_called_include
+        tools: [generate_calendar_link]
+      - type: calendar_link_in_response
