@@ -1,0 +1,300 @@
+{
+  "generated_at": "2026-06-02T19:52:03.943720+00:00",
+  "model": "openai/gpt-oss-20b",
+  "repetitions": 5,
+  "scenarios": [
+    {
+      "id": "briefing_runs_at_session_start",
+      "description": "Briefing runs if not already shown",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89de-1838-7b51-8c00-737755cf965f",
+            "total_tokens": 5776,
+            "prompt_tokens": 3591,
+            "completion_tokens": 2185,
+            "latency_ms": 55307.31
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89de-fb9f-7ab0-9512-0b37bad70025",
+            "total_tokens": 5753,
+            "prompt_tokens": 3591,
+            "completion_tokens": 2162,
+            "latency_ms": 52828.647
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89df-d4ac-7f80-b1c1-be08dcc2726e",
+            "total_tokens": 5674,
+            "prompt_tokens": 3591,
+            "completion_tokens": 2083,
+            "latency_ms": 51568.625
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89e0-a7a9-79c3-87dd-7cd4d0b3e1d1",
+            "total_tokens": 11779,
+            "prompt_tokens": 8667,
+            "completion_tokens": 3112,
+            "latency_ms": 78635.247
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tool_call_order",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89e1-e5a7-78d2-a3a7-054b3e5fa3a6",
+            "total_tokens": 7263,
+            "prompt_tokens": 4719,
+            "completion_tokens": 2544,
+            "latency_ms": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tools_called_include",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "tool_call_order",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 7249,
+        "std_tokens": 2617.7025232061796,
+        "p50_latency_ms": 54067.9785,
+        "p95_latency_ms": 78635.247
+      }
+    },
+    {
+      "id": "briefing_skipped_if_already_shown",
+      "description": "Briefing skipped when briefing_shown true",
+      "runs": 5,
+      "errors": 0,
+      "runs_detail": [
+        {
+          "run_index": 0,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89e2-ea7c-7692-be0b-a68e3dc5a2c6",
+            "total_tokens": 5896,
+            "prompt_tokens": 5077,
+            "completion_tokens": 819,
+            "latency_ms": 22209.999
+          }
+        },
+        {
+          "run_index": 1,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89e3-4c91-7a52-b682-809392429079",
+            "total_tokens": 5935,
+            "prompt_tokens": 5199,
+            "completion_tokens": 736,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 2,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89e3-ab20-7822-93ee-1be776322933",
+            "total_tokens": 5794,
+            "prompt_tokens": 5199,
+            "completion_tokens": 595,
+            "latency_ms": null
+          }
+        },
+        {
+          "run_index": 3,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89e3-fd33-7281-a471-8bcb3e227469",
+            "total_tokens": 5773,
+            "prompt_tokens": 5071,
+            "completion_tokens": 702,
+            "latency_ms": 17961.07
+          }
+        },
+        {
+          "run_index": 4,
+          "error": null,
+          "assertions": [
+            {
+              "name": "tools_not_called",
+              "passed": true,
+              "detail": ""
+            },
+            {
+              "name": "tools_called_include",
+              "passed": true,
+              "detail": ""
+            }
+          ],
+          "langsmith": {
+            "run_id": "019e89e4-4e5a-7992-9bba-a5f472467e57",
+            "total_tokens": 7763,
+            "prompt_tokens": 7054,
+            "completion_tokens": 709,
+            "latency_ms": 19767.644
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "tools_not_called",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        },
+        {
+          "name": "tools_called_include",
+          "passed": 5,
+          "failed": 0,
+          "pass_rate": 1.0
+        }
+      ],
+      "langsmith": {
+        "mean_tokens": 6232.2,
+        "std_tokens": 858.4274576223665,
+        "p50_latency_ms": 19767.644,
+        "p95_latency_ms": 22209.999
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 2,
+    "fully_passing": 2,
+    "partial": 0,
+    "errored": 0,
+    "overall_assertion_pass_rate": 1.0
+  }
+}
