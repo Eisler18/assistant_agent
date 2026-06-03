@@ -27,6 +27,7 @@ assistant_agent/
 - [Models](docs/models.md) - Core data models including Task entity and lifecycle management
 - [Repository](docs/repository.md) - Data persistence approach
 - [Graph Architecture](docs/graph.md) - Node topology, tools, and routing logic
+- [Evaluation framework](docs/evaluation.md) - Scenario runner, assertions, and reporting
 
 ## Getting Started
 
