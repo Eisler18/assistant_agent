@@ -5,7 +5,7 @@ from langsmith import Client as _Client
 
 
 def get_run_metrics(run_name: str, project_name: str = 'assistant_agent') -> dict[str, Any] | None:
-  if not os.getenv("LANGCHAIN_TRACING_V2", "").lower() == 'true':
+  if not os.getenv('LANGCHAIN_TRACING_V2', '').lower() == 'true':
     return None
 
   if _Client is None:
@@ -23,18 +23,18 @@ def get_run_metrics(run_name: str, project_name: str = 'assistant_agent') -> dic
     run = runs[0]
 
     latency_ms = None
-    if getattr(run, "start_time", None) and getattr(run, "end_time", None):
+    if getattr(run, 'start_time', None) and getattr(run, 'end_time', None):
       try:
         latency_ms = (run.end_time - run.start_time).total_seconds() * 1000
       except Exception: # pylint: disable=broad-except
         latency_ms = None
 
     return {
-      "run_id": str(getattr(run, "id", None)),
-      "total_tokens": getattr(run, "total_tokens", None),
-      "prompt_tokens": getattr(run, "prompt_tokens", None),
-      "completion_tokens": getattr(run, "completion_tokens", None),
-      "latency_ms": latency_ms,
+      'run_id': str(getattr(run, 'id', None)),
+      'total_tokens': getattr(run, 'total_tokens', None),
+      'prompt_tokens': getattr(run, 'prompt_tokens', None),
+      'completion_tokens': getattr(run, 'completion_tokens', None),
+      'latency_ms': latency_ms,
     }
   except Exception: # pylint: disable=broad-except
     return None
