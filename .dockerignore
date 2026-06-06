@@ -1,0 +1,17 @@
+.pylint.d
+coverage.xml
+.coverage
+.git
+.gitignore
+.env.*
+
+# Directories
+.venv
+__pycache__
+.pytest_cache
+htmlcov
+results
+.github
+dist
+tests
+docs
