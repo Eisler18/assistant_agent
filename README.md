@@ -68,6 +68,16 @@ Run with the ReAct graph:
 AGENT_GRAPH=react uv run assistant-agent
 ```
 
+### Running with Docker Compose
+
+Start the app in detached mode:
+
+```bash
+docker compose up -d --build
+```
+
+The app will be available at http://localhost:7860 and will persist task data in `./data`.
+
 ### Running Tests
 
 ```bash
