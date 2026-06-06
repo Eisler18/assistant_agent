@@ -1,0 +1,11 @@
+{
+  "action": "published",
+  "release": {
+    "target_commitish": "main"
+  },
+  "secrets": {
+    "LLM_MODEL_NAME": "",
+    "LLM_API_KEY": "",
+    "LLM_API_URL": ""
+  }
+}
