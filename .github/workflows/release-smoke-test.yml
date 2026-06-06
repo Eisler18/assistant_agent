@@ -1,0 +1,61 @@
+name: Release smoke test
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  code-quality:
+    uses: ./.github/workflows/code-quality.yml
+
+  smoke-test-api:
+    needs: code-quality
+    if: github.event.release.target_commitish == 'main'
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/catthehacker/ubuntu:act-22.04
+    env:
+      AGENT_TIMEZONE: Europe/Madrid
+      BRIEFING_ENABLED: "false"
+      LANGCHAIN_TRACING_V2: "true"
+      LLM_MODEL_NAME: ${{ secrets.LLM_MODEL_NAME }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_API_URL: ${{ secrets.LLM_API_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image (local)
+        run: docker compose build assistant-agent
+
+      - name: Prepare .env file
+        run: |
+          {
+            printf 'AGENT_TIMEZONE=%s\n' "$AGENT_TIMEZONE"
+            printf 'BRIEFING_ENABLED=%s\n' "$BRIEFING_ENABLED"
+            printf 'LANGCHAIN_TRACING_V2=%s\n' "$LANGCHAIN_TRACING_V2"
+            printf 'LLM_MODEL_NAME=%s\n' "$LLM_MODEL_NAME"
+            printf 'LLM_API_KEY=%s\n' "$LLM_API_KEY"
+            printf 'LLM_API_URL=%s\n' "$LLM_API_URL"
+          } > .env
+
+      - name: Run API container
+        run: docker compose up -d assistant-agent
+
+      - name: Health check
+        run: |
+          timeout 90s bash -c '
+            until [ "$(docker inspect --format="{{.State.Health.Status}}" assistant-agent)" = "healthy" ]; do
+              echo "Waiting for API to be healthy..."
+              sleep 5
+            done
+            echo "API is healthy!"
+          '
+
+      - name: Show logs
+        if: always()
+        run: docker compose logs assistant-agent
+
+      - name: Stop container
+        if: always()
+        run: docker compose down
