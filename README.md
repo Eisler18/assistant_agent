@@ -76,7 +76,19 @@ Start the app in detached mode:
 docker compose up -d --build
 ```
 
-The app will be available at http://localhost:7860 and will persist task data in `./data`.
+The app will be available at http://localhost:7860 and will persist task data in `./data`
+
+Additionally, deployment workflow can be tested locally using act:
+
+```bash
+act -W .github/workflows/release-smoke-test.yml -j smoke-test-api -s LLM_MODEL_NAME="model-name" -s LLM_API_KEY="api-key" -s LLM_API_URL="api-url"
+```
+
+Or adding the secrets to the predefined act event:
+
+```bash
+act -W .github/workflows/release-smoke-test.yml -j smoke-test-api -e act/release-smoke-test.json
+```
 
 ### Running Tests
 
