@@ -1,0 +1,13 @@
+services:
+  assistant-agent:
+    build:
+      context: .
+    image: assistant-agent
+    container_name: assistant-agent
+    env_file:
+      - .env
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
