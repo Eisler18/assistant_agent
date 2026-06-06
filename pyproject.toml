@@ -47,6 +47,9 @@ indent-string = "  "
 max-attributes = 10
 max-locals = 15
 
+[tool.pylint.typecheck]
+ignored-modules = ["gradio"]
+
 [tool.pylint.basic]
 good-names = ["i", "j", "k", "ex", "Run", "_", "id", "x", "y", "z"]
 

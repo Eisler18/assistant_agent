@@ -1,4 +1,7 @@
+from .app import build_app
+
 def main() -> None:
-  print("starting")
+  demo = build_app()
+  demo.launch()
 
 __all__ = ["main"]
