@@ -70,7 +70,7 @@ env = [
     # the variable isn't already present in the environment at pytest
     # startup (before .env is loaded) — so explicitly exporting it inline
     # still opts in to the Postgres checkpointer integration tests:
-    #   TEST_DATABASE_URL=... uv run pytest tests/.../test_postgres_checkpointer.py
+    #   TEST_DATABASE_URL=... uv run pytest tests/.../test_checkpointer.py
     "D:TEST_DATABASE_URL="
 ]
 filterwarnings = [

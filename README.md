@@ -118,7 +118,7 @@ Then run the integration tests against it:
 
 ```bash
 TEST_DATABASE_URL=postgresql://assistant_agent:assistant_agent@localhost:5432/assistant_agent_test \
-  uv run pytest tests/assistant_agent/graph/test_postgres_checkpointer.py
+  uv run pytest tests/assistant_agent/graph/test_checkpointer.py
 ```
 
 ## Evaluation
