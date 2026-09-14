@@ -178,6 +178,7 @@ _builder.add_edge('task_create_tools', 'task_create')
 _builder.add_edge('task_update_tools', 'task_update')
 _builder.add_edge('task_interrupt', END)
 
-graph = _builder.compile(
-  checkpointer=build_checkpointer(Config().database_url)
-)
+def build_graph(checkpointer: object | None = None) -> StateGraph:
+  return _builder.compile(checkpointer=checkpointer)
+
+graph = build_graph(build_checkpointer(Config().database_url))

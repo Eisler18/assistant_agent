@@ -96,6 +96,7 @@ _builder.add_conditional_edges('task_interrupt', should_save, {
   END: END
 })
 
-react_agent = _builder.compile(
-  checkpointer=build_checkpointer(config.database_url)
-)
+def build_graph(checkpointer: object | None = None) -> StateGraph:
+  return _builder.compile(checkpointer=checkpointer)
+
+react_agent = build_graph(build_checkpointer(config.database_url))
