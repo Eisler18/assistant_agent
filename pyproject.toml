@@ -14,7 +14,9 @@ dependencies = [
     "langchain-google-genai>=2.0.0,<3.0.0",
     "langchain-openai>=1.2.1",
     "langgraph>=1.1,<1.2",
+    "langgraph-checkpoint-postgres>=3.1.2",
     "langsmith>=0.3.45,<1.0.0",
+    "psycopg[binary,pool]>=3.3.5",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.2",
 ]
@@ -60,7 +62,13 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "--cov=src --cov-report=xml --cov-report=html --cov-report=term-missing"
-env = ["LANGCHAIN_TRACING_V2=false"]
+env = [
+    "LANGCHAIN_TRACING_V2=false",
+    # Force the default checkpointer to in-memory regardless of a local
+    # .env's DATABASE_URL, so `pytest` stays DB-free unless a test opts in
+    # via TEST_DATABASE_URL (see test_postgres_checkpointer.py).
+    "DATABASE_URL="
+]
 filterwarnings = [
     "ignore:The default value of `allowed_objects` will change in a future version.*:langchain_core._api.deprecation.LangChainPendingDeprecationWarning",
 ]
