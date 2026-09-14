@@ -1,11 +1,35 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: assistant-agent-postgres
+    environment:
+      POSTGRES_USER: assistant_agent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: assistant_agent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U assistant_agent -d assistant_agent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
   assistant-agent:
     build:
       context: .
     image: assistant-agent
     container_name: assistant-agent
+    depends_on:
+      postgres:
+        condition: service_healthy
     env_file:
       - .env
+    environment:
+      ENVIRONMENT: production
     ports:
       - "7860:7860"
     volumes:
@@ -21,3 +45,6 @@ services:
       retries: 3
       start_period: 20s
     restart: unless-stopped
+
+volumes:
+  postgres-data:

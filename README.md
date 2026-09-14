@@ -74,7 +74,11 @@ Start the app in detached mode:
 docker compose up -d --build
 ```
 
-The app will be available at http://localhost:7860 and will persist task data in `./data`
+The app will be available at http://localhost:7860 and will persist task data in `./data`.
+
+`docker-compose.yml` also starts a `postgres` service the app depends on, used to
+persist graph checkpoints (conversation state, including pending interrupts)
+across restarts — see [Checkpointing](docs/graph.md#checkpointing) for details.
 
 Additionally, deployment workflow can be tested locally using act:
 
@@ -94,6 +98,27 @@ act -W .github/workflows/release-smoke-test.yml -j smoke-test-api -e act/release
 uv run pytest
 uv run pylint tests/
 uv run pylint src/
+```
+
+The default `pytest` run is DB-free (it doesn't require Postgres). A separate
+set of integration tests exercises the real Postgres checkpointer and is
+skipped automatically unless `TEST_DATABASE_URL` is set.
+
+These tests expect their own `assistant_agent_test` database, kept separate
+from development data. It isn't created automatically — create it once
+after starting `postgres` (`createdb` errors harmlessly if it already
+exists; only needed again if the `postgres-data` volume is recreated):
+
+```bash
+docker compose up -d postgres
+docker compose exec postgres createdb -U assistant_agent assistant_agent_test
+```
+
+Then run the integration tests against it:
+
+```bash
+TEST_DATABASE_URL=postgresql://assistant_agent:assistant_agent@localhost:5432/assistant_agent_test \
+  uv run pytest tests/assistant_agent/graph/test_checkpointer.py
 ```
 
 ## Evaluation

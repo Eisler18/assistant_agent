@@ -1,8 +1,8 @@
 from langgraph.graph import START, END, StateGraph
-from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import SystemMessage
 
+from .checkpointer import build_checkpointer
 from .state import AgentState
 from .nodes import task_interrupt_node, _sanitize_tool_calls
 from . import tools
@@ -96,5 +96,7 @@ _builder.add_conditional_edges('task_interrupt', should_save, {
   END: END
 })
 
-_checkpointer = InMemorySaver()
-react_agent = _builder.compile(checkpointer=_checkpointer)
+def build_graph(checkpointer: object | None = None) -> StateGraph:
+  return _builder.compile(checkpointer=checkpointer)
+
+react_agent = build_graph(build_checkpointer(config.database_url))

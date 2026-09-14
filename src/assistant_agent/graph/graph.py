@@ -1,8 +1,8 @@
 
 from langchain_core.messages import BaseMessage
 from langgraph.graph import END, START, StateGraph
-from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import ToolNode
+from .checkpointer import build_checkpointer
 from .nodes import (
   after_initialiser_node,
   intent_classifier_node,
@@ -14,6 +14,7 @@ from .nodes import (
 )
 from .state import AgentState
 from . import tools
+from ..config import Config
 
 # --- Helpers --- #
 def _has_tool_calls(message: BaseMessage | None) -> bool:
@@ -177,5 +178,7 @@ _builder.add_edge('task_create_tools', 'task_create')
 _builder.add_edge('task_update_tools', 'task_update')
 _builder.add_edge('task_interrupt', END)
 
-_checkpointer = InMemorySaver()
-graph = _builder.compile(checkpointer=_checkpointer)
+def build_graph(checkpointer: object | None = None) -> StateGraph:
+  return _builder.compile(checkpointer=checkpointer)
+
+graph = build_graph(build_checkpointer(Config().database_url))
