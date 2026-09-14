@@ -7,10 +7,20 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
+_DATABASE_URL_VAR_BY_ENVIRONMENT = {
+  'production': 'DATABASE_URL',
+  'development': 'DEV_DATABASE_URL',
+  'test': 'TEST_DATABASE_URL',
+}
+
 class Config:
   def __init__(self):
     self._timezone = os.getenv('AGENT_TIMEZONE', 'UTC')
     self._briefing_enabled = os.getenv('BRIEFING_ENABLED', 'true').lower() == 'true'
+    self._environment = os.getenv('ENVIRONMENT', 'development')
+    self._database_url = os.getenv(
+      _DATABASE_URL_VAR_BY_ENVIRONMENT.get(self._environment, 'DEV_DATABASE_URL')
+    )
     self._llm = None  # Lazy-loaded LLM instance
 
   @property
@@ -40,3 +50,11 @@ class Config:
   @property
   def briefing_enabled(self):
     return self._briefing_enabled
+
+  @property
+  def environment(self):
+    return self._environment
+
+  @property
+  def database_url(self):
+    return self._database_url

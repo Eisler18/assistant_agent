@@ -51,4 +51,25 @@ class TestConfig:
     monkeypatch.delenv('BRIEFING_ENABLED', raising=False)
     config = Config()
     assert config.briefing_enabled is True
+
+  def test_config_database_url_selection(self, monkeypatch):
+    monkeypatch.setenv('ENVIRONMENT', 'production')
+    monkeypatch.setenv('DATABASE_URL', 'postgres://prod_db_url')
+    config = Config()
+    assert config.database_url == 'postgres://prod_db_url'
+
+    monkeypatch.setenv('ENVIRONMENT', 'development')
+    monkeypatch.setenv('DEV_DATABASE_URL', 'postgres://dev_db_url')
+    config = Config()
+    assert config.database_url == 'postgres://dev_db_url'
+
+    monkeypatch.setenv('ENVIRONMENT', 'test')
+    monkeypatch.setenv('TEST_DATABASE_URL', 'postgres://test_db_url')
+    config = Config()
+    assert config.database_url == 'postgres://test_db_url'
+
+  def test_config_environment_default(self, monkeypatch):
+    monkeypatch.delenv('ENVIRONMENT', raising=False)
+    config = Config()
+    assert config.environment == 'development'
 # pylint: enable=protected-access
