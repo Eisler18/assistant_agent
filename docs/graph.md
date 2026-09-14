@@ -94,18 +94,30 @@ flowchart TD
 
 The `session_initialiser` node runs at session start, emits a single briefing message, and sets `briefing_shown=True` in state. The daily briefing returns five sections: `overdue`, `today`, `upcoming`, `unscheduled`, and `stale`. The next user message triggers intent classification in a new invocation
 
-## MemorySaver Checkpointing
+## Checkpointing
 
-The graph is compiled with `InMemorySaver` for short-lived session memory.
-Callers must pass a thread id to retain state between turns:
+The graph and the ReAct agent are each compiled with a checkpointer so
+conversation state (including pending interrupts) survives across turns of
+the same thread. Callers must pass a thread id to retain state between turns:
 
 ```python
 result = graph.invoke(state, config={"configurable": {"thread_id": "session-1"}}, version="v2")
 ```
 
-This allows consecutive turns to reuse the stored message history. The
-in-memory checkpointer is suitable for development and thesis experiments; a
-persistent saver (for example, SQLite) can replace it later
+Which checkpointer backs this is decided by `assistant_agent.graph.checkpointer.build_checkpointer`,
+given whatever URL `Config.database_url` resolves to. That resolution is
+driven by `ENVIRONMENT` (`assistant_agent.config.Config`), which picks one of
+three Postgres connection strings rather than one `DATABASE_URL` being
+swapped/overridden per context:
+
+| `ENVIRONMENT` | URL used | Typical context |
+| --- | --- | --- |
+| `production` | `DATABASE_URL` | The `assistant-agent` container — docker-compose overrides `ENVIRONMENT` to `production` there, so this resolves against the `postgres` service hostname |
+| `development` (default) | `DEV_DATABASE_URL` | Running the app directly on the host, outside Docker (`localhost`, via the compose service's published port) |
+| `test` | `TEST_DATABASE_URL` | `pytest`, which forces `ENVIRONMENT=test` — points at a separate `assistant_agent_test` database so tests never touch development data. See README.md's "Running Tests" section |
+
+- When the resolved URL is set, a `PostgresSaver` is used, backed by a `psycopg_pool.ConnectionPool`
+- When it's unset, an `InMemorySaver` is used instead — state is lost on restart
 
 ## Design Rationale
 
