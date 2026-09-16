@@ -1,4 +1,5 @@
 
+from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 import pytest
@@ -38,6 +39,22 @@ class TestConfig:
     llm_instance = config.llm
     assert llm_instance is not None
     assert isinstance(config._llm, ChatOpenAI)
+
+  def test_config_anthropic_llm_initialization(self, monkeypatch):
+    monkeypatch.setenv('LLM_API_KEY', 'fake_api_key')
+    monkeypatch.setenv('LLM_MODEL_NAME', 'claude-haiku-4-5-20251001')
+    config = Config()
+    llm_instance = config.llm
+    assert llm_instance is not None
+    assert isinstance(config._llm, ChatAnthropic)
+
+  def test_config_llm_defaults_to_anthropic(self, monkeypatch):
+    monkeypatch.setenv('LLM_API_KEY', 'fake_api_key')
+    monkeypatch.delenv('LLM_MODEL_NAME', raising=False)
+    config = Config()
+    llm_instance = config.llm
+    assert llm_instance is not None
+    assert isinstance(config._llm, ChatAnthropic)
 
   def test_config_briefing_enabled_parsing(self, monkeypatch):
     monkeypatch.setenv('BRIEFING_ENABLED', 'true')

@@ -2,6 +2,7 @@
 import os
 
 from dotenv import load_dotenv
+from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 
@@ -26,7 +27,7 @@ class Config:
   @property
   def llm(self):
     if self._llm is None:
-      model_name = os.getenv('LLM_MODEL_NAME', 'gemini-2.5-flash-lite')
+      model_name = os.getenv('LLM_MODEL_NAME', 'claude-haiku-4-5-20251001')
       api_key = os.getenv('LLM_API_KEY')
       url = os.getenv('LLM_API_URL')
       if not api_key:
@@ -34,6 +35,8 @@ class Config:
 
       if 'gemini' in model_name.lower():
         self._llm = ChatGoogleGenerativeAI(model=model_name, api_key=api_key)
+      elif 'claude' in model_name.lower():
+        self._llm = ChatAnthropic(model=model_name, api_key=api_key)
       else:
         self._llm = ChatOpenAI(
           model=model_name,

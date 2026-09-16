@@ -14,5 +14,5 @@
 - [ ] All existing tests pass (`uv run pytest`)
 - [ ] Manually verified expected behaviour
 
-## Thesis/Reviewer Notes
-<!-- Optional: any design decisions or trade-offs worth documenting for the thesis -->
+## Rationale decisions
+<!-- Optional: any design decisions or trade-offs worth documenting -->
