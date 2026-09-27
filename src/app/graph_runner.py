@@ -7,9 +7,10 @@ from langgraph.graph import StateGraph
 
 from assistant_agent.graph.react_agent import react_agent
 from assistant_agent.graph.graph import graph
-from assistant_agent.repository import JsonRepository
+from assistant_agent.repository import build_repository
 from assistant_agent.models import Task
 from assistant_agent.graph.state import AgentState
+from assistant_agent.config import Config
 
 @dataclass
 class TurnResult:
@@ -25,7 +26,7 @@ def _get_graph() -> StateGraph:
   return graph
 
 def _setup_repository() -> None:
-  repo = JsonRepository(file_name='tasks.json')
+  repo = build_repository(Config().database_url)
   Task.set_repository(repo)
 
 def _extract_turn_result(result: AgentState) -> TurnResult:

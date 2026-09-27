@@ -6,12 +6,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
   PYTHONUNBUFFERED=1 \
   UV_LINK_MODE=copy
 
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock README.md alembic.ini ./
 COPY src/app ./src/app
 COPY src/assistant_agent ./src/assistant_agent
+COPY migrations ./migrations
+COPY docker-entrypoint.sh ./
 
 RUN uv sync --frozen --no-dev
 
 EXPOSE 7860
 
-ENTRYPOINT ["uv", "run", "assistant-agent"]
+ENTRYPOINT ["./docker-entrypoint.sh"]

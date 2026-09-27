@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "alembic>=1.20.0",
     "dateparser>=1.3.0",
     "gradio>=6.9.0",
     "langchain-core>=1.3,<2.0",
@@ -19,6 +20,7 @@ dependencies = [
     "psycopg[binary,pool]>=3.3.5",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.2",
+    "sqlalchemy>=2.0.54",
 ]
 
 [project.scripts]
@@ -35,6 +37,13 @@ dev = [
     "pytest-cov>=7.1.0",
     "pytest-env>=1.1.3",
 ]
+
+[tool.pylint.main]
+# Lets pylint resolve tests/assistant_agent/repository/task_scenarios.py --
+# a shared BaseRepository contract-test helper imported by bare name from
+# sibling test modules, the same way pytest's own rootdir-based import
+# already resolves it at runtime (no __init__.py in tests/).
+init-hook = "import sys; sys.path.append('tests/assistant_agent/repository')"
 
 [tool.pylint.messages_control]
 disable = [

@@ -1,8 +1,6 @@
 
 import os
-import uuid
 
-import psycopg
 import pytest
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 from langchain_core.messages import AIMessage, HumanMessage
@@ -19,19 +17,6 @@ requires_test_db = pytest.mark.skipif(
   not TEST_DATABASE_URL,
   reason='TEST_DATABASE_URL is not set; skipping Postgres checkpointer integration tests'
 )
-
-@pytest.fixture(name='schema_url')
-def fixture_schema_url():
-  schema = f'test_checkpoints_{uuid.uuid4().hex}'
-
-  with psycopg.connect(TEST_DATABASE_URL, autocommit=True) as conn:
-    conn.execute(f'CREATE SCHEMA "{schema}"')
-
-  yield f'{TEST_DATABASE_URL}?options=-csearch_path%3D{schema}'
-
-  with psycopg.connect(TEST_DATABASE_URL, autocommit=True) as conn:
-    conn.execute(f'DROP SCHEMA "{schema}" CASCADE')
-
 
 @requires_test_db
 def test_graph_state_survives_across_separate_instances(schema_url, monkeypatch):

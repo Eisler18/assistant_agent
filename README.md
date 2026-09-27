@@ -18,7 +18,7 @@ assistant_agent/
 │   ├── assistant_agent/      # Core assistant domain and workflows
 │   │   ├── graph/            # Workflow graph, nodes, tools, state
 │   │   ├── models/           # Domain entities (Task)
-│   │   ├── repository/       # Repository abstractions and JSON implementation
+│   │   ├── repository/       # Repository abstractions, JSON and Postgres implementations
 │   │   ├── utils/            # Shared utilities (date parsing)
 │   │   └── config.py         # Runtime and model configuration
 │   └── evaluation/           # Evaluation pipeline
@@ -74,11 +74,34 @@ Start the app in detached mode:
 docker compose up -d --build
 ```
 
-The app will be available at http://localhost:7860 and will persist task data in `./data`.
+The app will be available at http://localhost:7860.
 
-`docker-compose.yml` also starts a `postgres` service the app depends on, used to
-persist graph checkpoints (conversation state, including pending interrupts)
-across restarts — see [Checkpointing](docs/graph.md#checkpointing) for details.
+`docker-compose.yml` also starts a `postgres` service the app depends on, used to persist
+both graph checkpoints (conversation state, including pending interrupts) and tasks across
+restarts — see [Checkpointing](docs/graph.md#checkpointing) and
+[Repository](docs/repository.md) for details. The `assistant-agent` container runs any
+pending Alembic migrations automatically on startup (`docker-entrypoint.sh`) before the app
+starts, so `docker compose up` self-provisions the `tasks` table schema. If `DATABASE_URL`
+is left unset, the app falls back to `./data` for task storage instead (see
+[Repository](docs/repository.md)).
+
+### Database Migrations
+
+Schema changes to Postgres-backed models (currently just `tasks`) go through
+[Alembic](https://alembic.sqlalchemy.org/), targeting whichever `*_DATABASE_URL`
+`ENVIRONMENT` resolves to (see [Checkpointing](docs/graph.md#checkpointing)):
+
+```bash
+# Apply pending migrations (e.g. after pulling changes, or against a fresh dev DB)
+uv run alembic upgrade head
+
+# After changing src/assistant_agent/repository/schema.py, generate a migration
+# and review the generated file in migrations/versions/ before committing it
+uv run alembic revision --autogenerate -m "describe the change"
+```
+
+See [Repository](docs/repository.md#schema-and-migrations) for why Alembic is scoped to
+avoid the tables the LangGraph checkpointer manages on its own.
 
 Additionally, deployment workflow can be tested locally using act:
 
