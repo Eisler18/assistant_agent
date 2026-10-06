@@ -19,15 +19,36 @@ title: Repository Architecture
 graph TB
     A[Task Model] -->|uses| B[Repository Interface]
     B -->|implemented by| C[JsonRepository]
+    B -->|implemented by| G[PostgresRepository]
     B -->|can be| D[MockRepository]
     C -->|persists to| E[JSON File]
+    G -->|persists to| H[Postgres: tasks table]
     D -->|for| F[Testing]
-    
+
     style A fill:#e1f5ff
     style B fill:#fff3e0
     style C fill:#f3e5f5
+    style G fill:#f3e5f5
     style E fill:#e8f5e9
+    style H fill:#e8f5e9
 ```
+
+## Which implementation is used
+
+`build_repository` (`assistant_agent.repository.factory`) picks the implementation the same
+way `assistant_agent.graph.checkpointer.build_checkpointer` picks a checkpointer: driven by
+`Config.database_url`, which is itself `ENVIRONMENT`-driven (see `docs/graph.md`'s
+"Checkpointing" section).
+
+- When a database URL is configured, `PostgresRepository` is used — the same Postgres
+  instance backs both LangGraph checkpoints and tasks ("shared database, separate tables").
+- When it's unset, `JsonRepository` is used as a fallback so the app still runs without
+  Docker — mirroring the in-memory checkpointer fallback.
+
+`app/graph_runner.py`'s `_setup_repository()` is the real app's call site. The evaluation
+harness (`src/evaluation/seeder.py`, `runner.py`) deliberately always uses `JsonRepository`
+directly instead, for cheap, disposable, per-scenario fixtures — it doesn't go through
+`build_repository`.
 
 ## BaseRepository
 
@@ -124,6 +145,64 @@ pending = repo.list({"status": "pending"})
 # Filter by multiple criteria
 completed_by_user = repo.list({"status": "completed", "title": "Write Report"})
 ```
+
+## PostgresRepository
+
+The `PostgresRepository` persists tasks to a `tasks` table via SQLAlchemy Core (`Table`,
+`select`, `insert`) — no declarative ORM models, matching the plain, explicit style used
+elsewhere in the repo (`JsonRepository`, `graph/checkpointer.py`'s raw `psycopg`).
+
+### Initialization
+
+```python
+from assistant_agent.repository import PostgresRepository
+
+# From a connection URL
+repo = PostgresRepository(database_url="postgresql://user:pass@localhost:5432/assistant_agent")
+
+# Or from an existing SQLAlchemy Engine (e.g. for a pre-configured connection pool)
+repo = PostgresRepository(engine=my_engine)
+```
+
+`database_url` accepts the plain `postgresql://` scheme (the same string
+`Config.database_url` resolves and the checkpointer's `psycopg.connect` uses) —
+`PostgresRepository` rewrites it to `postgresql+psycopg://` internally
+(`assistant_agent.repository.engine.build_engine`) so SQLAlchemy uses the psycopg3 driver
+already installed for the checkpointer, instead of adding `psycopg2` as a second Postgres
+driver dependency.
+
+### Schema and migrations
+
+The `tasks` table is defined once, as SQLAlchemy metadata, in
+`assistant_agent/repository/schema.py` — imported by both `PostgresRepository` and Alembic's
+`migrations/env.py` (for autogenerate). Schema changes go through Alembic:
+
+```bash
+# After changing schema.py, generate a migration:
+uv run alembic revision --autogenerate -m "describe the change"
+
+# Review the generated file in migrations/versions/, then apply it:
+uv run alembic upgrade head
+```
+
+**Alembic and the LangGraph checkpointer manage separate tables in the same database.**
+`PostgresSaver.setup()` (see `graph/checkpointer.py`) owns its own tables (`checkpoints`,
+`checkpoint_blobs`, `checkpoint_writes`, `checkpoint_migrations`) independently of Alembic.
+`migrations/env.py` restricts Alembic's autogenerate/compare to tables declared in
+`schema.py`'s metadata (via an `include_name` filter) specifically so it never proposes
+dropping the checkpointer's tables as "unknown" — without that filter, autogenerate detects
+them as unmanaged and generates `DROP TABLE` migrations for them.
+
+In production, migrations run automatically on container startup (`docker-entrypoint.sh`
+runs `alembic upgrade head` before the app starts, when `DATABASE_URL` is set).
+
+### Methods
+
+Same `save`/`get`/`list` contract as `BaseRepository` — behaves identically to
+`JsonRepository` from the `Task` model's perspective (same dict shape in and out, same
+`KeyError` on a missing `get`, same upsert-by-`id` semantics on `save`, same `TaskFilter`
+query support). Query filtering is implemented as SQL `WHERE` clauses instead of Python-side
+filtering.
 
 ## Dependency Injection
 
